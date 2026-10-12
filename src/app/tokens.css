@@ -1,0 +1,63 @@
+/* Sticker Club tokens (docs/DESIGN.md §14). The only file allowed to hold hex values. */
+:root {
+  --bg: #fff7ec;
+  --surface: #ffffff;
+  --ink: #2a1736;
+  --muted: #6a5874;
+  --primary: #ff6b2c;
+  --bubble: #ff8fb8;
+  --highlight: #ffe066;
+  --fresh: #7fddbe;
+  --peach: #ffd3bf;
+  --row-line: #e3d6e8;
+  --scrim: rgba(42, 23, 54, 0.55);
+
+  --border: 2.5px;
+  --border-sm: 2px;
+  --radius-input: 16px;
+  --radius-card: 24px;
+  --radius-panel: 28px;
+  --radius-pill: 999px;
+
+  --shadow-sm: 3px 3px 0 var(--ink);
+  --shadow-md: 4px 4px 0 var(--ink);
+  --shadow-lg: 5px 5px 0 var(--ink);
+  --shadow-xl: 8px 8px 0 var(--ink);
+
+  --font-display: var(--font-unbounded), sans-serif;
+  --font-text: var(--font-figtree), sans-serif;
+
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur-press: 90ms;
+  --dur-sheet: 220ms;
+}
+
+/* Tailwind v4. Default palette and soft shadows are removed so only tokens exist. */
+@theme {
+  --color-*: initial;
+  --shadow-*: initial;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-bubble: var(--bubble);
+  --color-highlight: var(--highlight);
+  --color-fresh: var(--fresh);
+  --color-peach: var(--peach);
+  --color-row-line: var(--row-line);
+  --color-scrim: var(--scrim);
+  --color-transparent: transparent;
+  --font-display: var(--font-unbounded), sans-serif;
+  --font-sans: var(--font-figtree), sans-serif;
+  --shadow-sticker-sm: var(--shadow-sm);
+  --shadow-sticker: var(--shadow-md);
+  --shadow-sticker-lg: var(--shadow-lg);
+  --shadow-sticker-xl: var(--shadow-xl);
+  --shadow-sticker-2: 2px 2px 0 var(--ink);
+  --shadow-sticker-6: 6px 6px 0 var(--ink);
+  --ease-sticker: var(--ease-out);
+}
