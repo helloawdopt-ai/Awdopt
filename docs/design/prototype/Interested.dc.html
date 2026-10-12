@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>I'm interested in Bruno</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..900&amp;family=Figtree:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#2A1736}a:hover{color:#2A1736}
+</style>
+</helmet>
+<div style="width: 390px; height: 980px; box-sizing: border-box; position: relative; background: #FFF7EC; color: #2A1736; font-family: 'Figtree', sans-serif; overflow: hidden">
+  <div style="padding: 12px 16px 0; display: flex; flex-direction: column; gap: 14px">
+    <header style="height: 56px; display: flex; align-items: center; gap: 12px">
+      <a href="Why.dc.html" aria-label="Back" style="width: 44px; height: 44px; border-radius: 14px; border: 2px solid #2A1736; background: #FFFFFF; display: flex; align-items: center; justify-content: center; box-sizing: border-box">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#2A1736" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>
+      </a>
+      <span style="font-size: 17px; font-weight: 800">Say hi to Bruno</span>
+    </header>
+
+    <div style="display: flex; gap: 12px; align-items: center; background: #FFFFFF; border: 2.5px solid #2A1736; border-radius: 20px; padding: 10px">
+      <div style="width: 56px; height: 56px; border-radius: 14px; border: 2px solid #2A1736; background: #FFE066; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #6A5874">[photo]</div>
+      <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px"><strong style="font-family: 'Unbounded', sans-serif; font-size: 17px">Bruno</strong><span style="font-size: 13px; color: #6A5874">2 yrs · Indie · Andheri W</span></div>
+      <span style="font-family: 'Unbounded', sans-serif; font-weight: 800; font-size: 15px; background: #FF8FB8; border: 2px solid #2A1736; border-radius: 999px; padding: 4px 10px">92%</span>
+    </div>
+
+    <span style="font-size: 14px; color: #6A5874">We filled this in from your answers. Check it's right.</span>
+
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <label for="f-name" style="font-size: 14px; font-weight: 800">Your name</label>
+      <input id="f-name" value="Riya Sharma" autocomplete="name" style="height: 52px; border-radius: 16px; border: 2.5px solid #2A1736; background: #FFFFFF; padding: 0 14px; font-family: 'Figtree', sans-serif; font-size: 16px; color: #2A1736; box-sizing: border-box">
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <label for="f-phone" style="font-size: 14px; font-weight: 800">Phone / WhatsApp</label>
+      <input id="f-phone" type="tel" inputmode="tel" value="+91 90000 00000" autocomplete="tel" style="height: 52px; border-radius: 16px; border: 2.5px solid #2A1736; background: #FFFFFF; padding: 0 14px; font-family: 'Figtree', sans-serif; font-size: 16px; color: #2A1736; box-sizing: border-box">
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <label for="f-email" style="font-size: 14px; font-weight: 800">Email</label>
+      <input id="f-email" type="email" value="riya@example.com" autocomplete="email" style="height: 52px; border-radius: 16px; border: 2.5px solid #2A1736; background: #FFFFFF; padding: 0 14px; font-family: 'Figtree', sans-serif; font-size: 16px; color: #2A1736; box-sizing: border-box">
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <label for="f-msg" style="font-size: 14px; font-weight: 800">Message <span style="font-weight: 500; color: #6A5874">(optional)</span></label>
+      <textarea id="f-msg" rows="3" placeholder="Anything you'd like the team to know?" style="border-radius: 16px; border: 2.5px solid #2A1736; background: #FFFFFF; padding: 12px 14px; font-family: 'Figtree', sans-serif; font-size: 16px; color: #2A1736; resize: none; box-sizing: border-box"></textarea>
+    </div>
+
+    <div style="background: #7FDDBE; border: 2.5px solid #2A1736; border-radius: 20px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px">
+      <strong style="font-size: 14px; display: flex; gap: 8px; align-items: center"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#2A1736" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>How we handle your details</strong>
+      <span style="font-size: 13px; line-height: 1.45">Only the AWDOPT team can see them, to arrange a meeting with Bruno's foster. They are never shown publicly or sold. Ask us anytime and we'll delete them.</span>
+    </div>
+
+    <div style="display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 1.4">
+      <input id="f-consent" type="checkbox" checked="{{agreed}}" onChange="{{toggle}}" style="flex-shrink: 0; width: 24px; height: 24px; margin: 0; accent-color: #FF6B2C">
+      <label for="f-consent">I agree to AWDOPT using these details to contact me about Bruno. <a href="#" style="font-weight: 800">Privacy notice</a></label>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 0; padding: 12px 16px 22px; background: #FFF7EC; border-top: 2.5px solid #2A1736; display: flex; flex-direction: column; gap: 10px">
+    <div style="display: flex; gap: 8px; align-items: center; font-size: 12px; font-weight: 700; color: #6A5874"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#2A1736" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6z"></path><path d="M9 12l2 2 4-4"></path></svg>Bot check passed</div>
+    <a href="Sent.dc.html" style="height: 54px; border-radius: 999px; background: #FF6B2C; border: 2.5px solid #2A1736; box-shadow: 4px 4px 0 #2A1736; color: #2A1736; font-size: 17px; font-weight: 800; text-decoration: none; display: flex; align-items: center; justify-content: center; box-sizing: border-box">Send my interest</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":980}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { agreed: false };
+  }
+  renderVals() {
+    var self = this;
+    return {
+      agreed: this.state.agreed,
+      toggle: function () { self.setState({ agreed: !self.state.agreed }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

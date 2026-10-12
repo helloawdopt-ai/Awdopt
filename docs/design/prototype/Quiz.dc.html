@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Questionnaire: lifestyle</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..900&amp;family=Figtree:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#2A1736}a:hover{color:#2A1736}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; position: relative; background: #FFF7EC; color: #2A1736; font-family: 'Figtree', sans-serif; overflow: hidden">
+  <div style="padding: 12px 16px 0; display: flex; flex-direction: column; gap: 16px">
+    <header style="height: 56px; display: flex; align-items: center; gap: 12px">
+      <a href="Profile.dc.html" aria-label="Back" style="width: 44px; height: 44px; border-radius: 14px; border: 2px solid #2A1736; background: #FFFFFF; display: flex; align-items: center; justify-content: center; box-sizing: border-box">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#2A1736" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>
+      </a>
+      <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 6px">
+        <span style="font-size: 13px; font-weight: 800">Step 3 of 5 · Lifestyle</span>
+        <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px">
+          <span style="height: 8px; border-radius: 4px; background: #2A1736"></span>
+          <span style="height: 8px; border-radius: 4px; background: #2A1736"></span>
+          <span style="height: 8px; border-radius: 4px; background: #FF6B2C; border: 1.5px solid #2A1736; box-sizing: border-box"></span>
+          <span style="height: 8px; border-radius: 4px; background: #2A1736; opacity: 0.15"></span>
+          <span style="height: 8px; border-radius: 4px; background: #2A1736; opacity: 0.15"></span>
+        </div>
+      </div>
+    </header>
+
+    <h1 style="margin: 0; font-family: 'Unbounded', sans-serif; font-weight: 800; font-size: 24px; line-height: 1.12; letter-spacing: -0.035em">What do your days look like?</h1>
+
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <span style="font-size: 15px; font-weight: 800">How active are you?</span>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+        <sc-for list="{{activity}}" as="o" hint-placeholder-count="4">
+          <button onClick="{{o.pick}}" aria-pressed="{{o.pressed}}" style="text-align: left; min-height: 84px; padding: 12px; border-radius: 18px; border: 2.5px solid #2A1736; background: {{o.bg}}; box-shadow: {{o.shadow}}; font-family: 'Figtree', sans-serif; color: #2A1736; display: flex; flex-direction: column; gap: 4px">
+            <span style="font-size: 15px; font-weight: 800">{{o.label}}</span>
+            <span style="font-size: 13px; line-height: 1.35">{{o.hint}}</span>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+
+    <sc-for list="{{rows}}" as="r" hint-placeholder-count="3">
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <span style="font-size: 15px; font-weight: 800">{{r.q}}</span>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px">
+          <sc-for list="{{r.opts}}" as="o" hint-placeholder-count="4">
+            <button onClick="{{o.pick}}" aria-pressed="{{o.pressed}}" style="height: 44px; padding: 0 14px; border-radius: 999px; border: 2px solid #2A1736; background: {{o.bg}}; box-shadow: {{o.shadow}}; font-family: 'Figtree', sans-serif; font-size: 14px; font-weight: 700; color: #2A1736">{{o.label}}</button>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 0; padding: 10px 16px 22px; background: #FFF7EC; border-top: 2.5px solid #2A1736; display: flex; flex-direction: column; gap: 10px">
+    <div style="display: flex; gap: 8px; align-items: center; font-size: 12px; color: #6A5874">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#2A1736" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+      Answers stay on this device until you finish.
+    </div>
+    <a href="Matching.dc.html" style="height: 54px; border-radius: 999px; background: #FF6B2C; border: 2.5px solid #2A1736; box-shadow: 4px 4px 0 #2A1736; color: #2A1736; font-size: 17px; font-weight: 800; text-decoration: none; display: flex; align-items: center; justify-content: center; box-sizing: border-box">Next: Preferences</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { activity: 'Daily walks', alone: '4–6 hrs', time: '1–2 hrs', exp: 'Had a dog before' };
+  }
+  renderVals() {
+    var self = this;
+    function opt(key, label, extra) {
+      var sel = self.state[key] === label;
+      var o = {
+        label: label,
+        pressed: sel ? 'true' : 'false',
+        bg: sel ? '#FFE066' : '#FFFFFF',
+        shadow: sel ? '3px 3px 0 #2A1736' : 'none',
+        pick: function () { var s = {}; s[key] = label; self.setState(s); }
+      };
+      if (extra) { o.hint = extra; }
+      return o;
+    }
+    return {
+      activity: [
+        opt('activity', 'Couch era', 'Mostly home, short strolls'),
+        opt('activity', 'Daily walks', 'Morning + evening walks'),
+        opt('activity', 'Runs & hikes', 'Out most weekends'),
+        opt('activity', 'Always moving', 'Sport, trails, beach runs')
+      ],
+      rows: [
+        { q: 'Hours your dog would be alone on a weekday', opts: ['Under 2 hrs', '2–4 hrs', '4–6 hrs', '6+ hrs'].map(function (l) { return opt('alone', l); }) },
+        { q: 'Time you can give daily for walks & play', opts: ['Under 1 hr', '1–2 hrs', '2+ hrs'].map(function (l) { return opt('time', l); }) },
+        { q: 'Your experience with dogs', opts: ['First dog', 'Had a dog before', 'Trained / rescued dogs'].map(function (l) { return opt('exp', l); }) }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

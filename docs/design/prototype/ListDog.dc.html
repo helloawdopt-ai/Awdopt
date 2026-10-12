@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>List a Dog: about the dog</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..900&amp;family=Figtree:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#2A1736}a:hover{color:#2A1736}
+</style>
+</helmet>
+<div style="width: 390px; height: 1060px; box-sizing: border-box; position: relative; background: #FFF7EC; color: #2A1736; font-family: 'Figtree', sans-serif; overflow: hidden">
+  <div style="padding: 12px 16px 0; display: flex; flex-direction: column; gap: 16px">
+    <header style="height: 56px; display: flex; align-items: center; gap: 12px">
+      <a href="Main.dc.html" aria-label="Back" style="width: 44px; height: 44px; border-radius: 14px; border: 2px solid #2A1736; background: #FFFFFF; display: flex; align-items: center; justify-content: center; box-sizing: border-box">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#2A1736" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>
+      </a>
+      <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 6px">
+        <span style="font-size: 13px; font-weight: 800">List a Dog · Step 2 of 5</span>
+        <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px">
+          <span style="height: 8px; border-radius: 4px; background: #2A1736"></span>
+          <span style="height: 8px; border-radius: 4px; background: #FF6B2C; border: 1.5px solid #2A1736; box-sizing: border-box"></span>
+          <span style="height: 8px; border-radius: 4px; background: #2A1736; opacity: 0.15"></span>
+          <span style="height: 8px; border-radius: 4px; background: #2A1736; opacity: 0.15"></span>
+          <span style="height: 8px; border-radius: 4px; background: #2A1736; opacity: 0.15"></span>
+        </div>
+      </div>
+    </header>
+
+    <h1 style="margin: 0; font-family: 'Unbounded', sans-serif; font-weight: 800; font-size: 24px; line-height: 1.12; letter-spacing: -0.035em">Tell us about the dog</h1>
+
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <span style="font-size: 15px; font-weight: 800">Photos <span style="font-weight: 500; color: #6A5874">· up to 6</span></span>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+        <div style="height: 100px; border-radius: 16px; border: 2.5px solid #2A1736; background: #FF8FB8; position: relative; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #2A1736">[photo 1]<button aria-label="Remove photo 1" style="position: absolute; top: -10px; right: -10px; width: 28px; height: 28px; border-radius: 999px; border: 2px solid #2A1736; background: #FFFFFF; padding: 0; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#2A1736" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+        <div style="height: 100px; border-radius: 16px; border: 2.5px solid #2A1736; background: #FFE066; position: relative; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #2A1736">[photo 2]<button aria-label="Remove photo 2" style="position: absolute; top: -10px; right: -10px; width: 28px; height: 28px; border-radius: 999px; border: 2px solid #2A1736; background: #FFFFFF; padding: 0; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#2A1736" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+        <button style="height: 100px; border-radius: 16px; border: 2.5px dashed #2A1736; background: #FFFFFF; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-family: 'Figtree', sans-serif; font-size: 13px; font-weight: 800; color: #2A1736"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#2A1736" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Add</button>
+      </div>
+      <span style="font-size: 12px; line-height: 1.4; color: #6A5874">We strip location data from photos before upload, so your home stays private.</span>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <label for="l-name" style="font-size: 15px; font-weight: 800">Dog's name</label>
+      <input id="l-name" value="Mishti" style="height: 52px; border-radius: 16px; border: 2.5px solid #2A1736; background: #FFFFFF; padding: 0 14px; font-family: 'Figtree', sans-serif; font-size: 16px; color: #2A1736; box-sizing: border-box">
+    </div>
+
+    <sc-for list="{{segs}}" as="s" hint-placeholder-count="3">
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <span style="font-size: 15px; font-weight: 800">{{s.q}}</span>
+        <div style="display: flex; border: 2.5px solid #2A1736; border-radius: 999px; overflow: hidden; background: #FFFFFF">
+          <sc-for list="{{s.opts}}" as="o" hint-placeholder-count="3">
+            <button onClick="{{o.pick}}" aria-pressed="{{o.pressed}}" style="flex: 1 1 0; height: 46px; border: 0; border-right: {{o.div}}; background: {{o.bg}}; font-family: 'Figtree', sans-serif; font-size: 14px; font-weight: 800; color: #2A1736">{{o.label}}</button>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <span style="font-size: 15px; font-weight: 800">Good with</span>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap">
+        <span style="height: 40px; padding: 0 14px; border-radius: 999px; border: 2px solid #2A1736; background: #7FDDBE; font-size: 14px; font-weight: 700; display: flex; align-items: center; box-sizing: border-box">Kids: yes</span>
+        <span style="height: 40px; padding: 0 14px; border-radius: 999px; border: 2px solid #2A1736; background: #7FDDBE; font-size: 14px; font-weight: 700; display: flex; align-items: center; box-sizing: border-box">Dogs: yes</span>
+        <span style="height: 40px; padding: 0 14px; border-radius: 999px; border: 2px dashed #2A1736; background: #FFFFFF; font-size: 14px; font-weight: 700; display: flex; align-items: center; box-sizing: border-box">Cats: not sure</span>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <label for="l-video" style="font-size: 15px; font-weight: 800">Video link <span style="font-weight: 500; color: #6A5874">(optional, YouTube or Drive)</span></label>
+      <input id="l-video" type="url" placeholder="https://" style="height: 52px; border-radius: 16px; border: 2.5px solid #2A1736; background: #FFFFFF; padding: 0 14px; font-family: 'Figtree', sans-serif; font-size: 16px; color: #2A1736; box-sizing: border-box">
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 16px 22px; background: #FFF7EC; border-top: 2.5px solid #2A1736">
+    <a href="ListSent.dc.html" style="height: 54px; border-radius: 999px; background: #FF6B2C; border: 2.5px solid #2A1736; box-shadow: 4px 4px 0 #2A1736; color: #2A1736; font-size: 17px; font-weight: 800; text-decoration: none; display: flex; align-items: center; justify-content: center; box-sizing: border-box">Next: Health &amp; story</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1060}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { sex: 'Female', size: 'Medium', energy: 'Balanced' };
+  }
+  renderVals() {
+    var self = this;
+    function seg(key, q, labels) {
+      return {
+        q: q,
+        opts: labels.map(function (l, i) {
+          var sel = self.state[key] === l;
+          return {
+            label: l,
+            pressed: sel ? 'true' : 'false',
+            bg: sel ? '#FFE066' : '#FFFFFF',
+            div: i === labels.length - 1 ? '0' : '2px solid #2A1736',
+            pick: function () { var s = {}; s[key] = l; self.setState(s); }
+          };
+        })
+      };
+    }
+    return {
+      segs: [
+        seg('sex', 'Sex', ['Female', 'Male']),
+        seg('size', 'Size', ['Small', 'Medium', 'Large']),
+        seg('energy', 'Energy', ['Chill', 'Balanced', 'Zoomies'])
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

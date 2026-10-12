@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Finding your matches</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..900&amp;family=Figtree:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#2A1736}a:hover{color:#2A1736}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; position: relative; background: #7FDDBE; color: #2A1736; font-family: 'Figtree', sans-serif; overflow: hidden; padding: 64px 20px 24px; display: flex; flex-direction: column; gap: 22px">
+  <svg viewBox="0 0 40 40" style="position: absolute; right: 36px; top: 40px; width: 44px; height: 44px" aria-hidden="true"><path d="M20 0 C22 14 26 18 40 20 C26 22 22 26 20 40 C18 26 14 22 0 20 C14 18 18 14 20 0Z" fill="#FFE066" stroke="#2A1736" stroke-width="2.5" stroke-linejoin="round"></path></svg>
+  <svg viewBox="0 0 40 40" style="position: absolute; left: 26px; top: 210px; width: 26px; height: 26px" aria-hidden="true"><path d="M20 0 C22 14 26 18 40 20 C26 22 22 26 20 40 C18 26 14 22 0 20 C14 18 18 14 20 0Z" fill="#FF8FB8" stroke="#2A1736" stroke-width="3" stroke-linejoin="round"></path></svg>
+
+  <div style="align-self: flex-start; transform: rotate(-4deg); background: #FF8FB8; border: 2.5px solid #2A1736; border-radius: 26px; box-shadow: 5px 5px 0 #2A1736; padding: 16px 20px; font-family: 'Unbounded', sans-serif; font-weight: 800; font-size: 26px; line-height: 1.15; letter-spacing: -0.03em">sniffing out<br>your matches…</div>
+  <p style="margin: 0; font-size: 16px; line-height: 1.5">Scoring 24 dogs against your answers. Dogs that can't safely live with you are left out, not ranked low.</p>
+
+  <div style="background: #FFFFFF; border: 2.5px solid #2A1736; border-radius: 24px; box-shadow: 5px 5px 0 #2A1736; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px">
+    <sc-for list="{{cats}}" as="c" hint-placeholder-count="8">
+      <div style="height: 38px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1.5px dashed {{c.line}}; font-size: 15px; font-weight: 700; color: {{c.fg}}">
+        <span>{{c.name}}</span>
+        <sc-if value="{{c.done}}" hint-placeholder-val="{{true}}">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#7FDDBE" stroke="#2A1736" stroke-width="2"></circle><path d="M7.5 12.5l3 3 6-6.5" fill="none" stroke="#2A1736" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </sc-if>
+        <sc-if value="{{c.now}}" hint-placeholder-val="{{false}}">
+          <span style="font-size: 12px; font-weight: 800; background: #FFE066; border: 2px solid #2A1736; border-radius: 999px; padding: 2px 8px">scoring</span>
+        </sc-if>
+      </div>
+    </sc-for>
+  </div>
+
+  <a href="Results.dc.html" style="margin-top: auto; height: 54px; border-radius: 999px; background: #FF6B2C; border: 2.5px solid #2A1736; box-shadow: 4px 4px 0 #2A1736; color: #2A1736; font-size: 17px; font-weight: 800; text-decoration: none; display: flex; align-items: center; justify-content: center; box-sizing: border-box">See my matches</a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var names = ['Lifestyle & activity', 'Living situation', 'Time availability', 'Children & other pets', 'Dog experience', 'Size preference', 'Age preference', 'Special-needs fit'];
+    return {
+      cats: names.map(function (n, i) {
+        return { name: n, done: i < 5, now: i === 5, fg: i > 5 ? '#6A5874' : '#2A1736', line: i === 7 ? 'transparent' : '#E3D6E8' };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

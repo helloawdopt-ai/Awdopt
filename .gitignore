@@ -1,0 +1,44 @@
+# --- Private: never in the public repo ---
+/SCOPE.md
+/BRIEF.md
+/docs/private/
+/AWDOPT_BUILD_PROMPT.md
+/DECISIONS.md
+
+# --- Secrets ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# --- Claude Code local files ---
+.claude/settings.local.json
+.claude/skills/
+skills-lock.json
+
+# --- Next.js / Node ---
+node_modules/
+.next/
+out/
+build/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# --- Tooling ---
+.vercel/
+supabase/.temp/
+supabase/.branches/
+playwright-report/
+test-results/
+.lighthouseci/
+
+# --- OS / editor ---
+.DS_Store
+.vscode/
+.idea/
