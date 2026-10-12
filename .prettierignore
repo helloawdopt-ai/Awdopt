@@ -3,3 +3,4 @@ docs/
 public/brand/
 src/app/icon.svg
 src/components/brand/logo-geometry.ts
+src/lib/database.types.ts
