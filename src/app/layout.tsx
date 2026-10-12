@@ -8,7 +8,7 @@ import "./globals.css";
 const unbounded = Unbounded({
   variable: "--font-unbounded",
   subsets: ["latin"],
-  weight: ["700", "800"],
+  weight: "800", // one preloaded file; 700 text uses it too (DESIGN.md Display S allows 800)
   display: "swap",
 });
 const figtree = Figtree({ variable: "--font-figtree", subsets: ["latin"], weight: "variable", display: "swap" });
