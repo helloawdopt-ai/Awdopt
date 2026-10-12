@@ -12,7 +12,7 @@ const lum = (hex: string) => {
   });
   return 0.2126 * r! + 0.7152 * g! + 0.0722 * b!;
 };
-export const ratio = (a: string, b: string) => {
+const ratio = (a: string, b: string) => {
   const [hi, lo] = [lum(a), lum(b)].sort((x, y) => y - x);
   return (hi! + 0.05) / (lo! + 0.05);
 };

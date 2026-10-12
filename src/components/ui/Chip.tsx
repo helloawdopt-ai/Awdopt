@@ -69,7 +69,6 @@ const statusTone = {
   fresh: "bg-fresh",
   highlight: "bg-highlight",
   bubble: "bg-bubble",
-  primary: "bg-primary",
   plain: "bg-surface",
 } as const;
 

@@ -5,10 +5,10 @@ import { useEffect, useRef, useState } from "react";
 
 type Photo = { file: File; url: string };
 
-type Props = { max?: number; onChange?: (files: File[]) => void };
+type Props = { max?: number };
 
 // UI only for now. The resize/WebP/EXIF-strip pipeline and signed uploads arrive with the listing form.
-export function PhotoUploader({ max = 6, onChange }: Props) {
+export function PhotoUploader({ max = 6 }: Props) {
   const input = useRef<HTMLInputElement>(null);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const live = useRef(photos);
@@ -18,21 +18,16 @@ export function PhotoUploader({ max = 6, onChange }: Props) {
   // Revoke any remaining previews on unmount.
   useEffect(() => () => live.current.forEach((p) => URL.revokeObjectURL(p.url)), []);
 
-  const update = (next: Photo[]) => {
-    setPhotos(next);
-    onChange?.(next.map((p) => p.file));
-  };
-
   const add = (files: FileList | null) => {
     if (!files) return;
     const added = [...files].slice(0, max - photos.length).map((file) => ({ file, url: URL.createObjectURL(file) }));
-    update([...photos, ...added]);
+    setPhotos([...photos, ...added]);
     if (input.current) input.current.value = "";
   };
 
   const remove = (p: Photo) => {
     URL.revokeObjectURL(p.url);
-    update(photos.filter((x) => x !== p));
+    setPhotos(photos.filter((x) => x !== p));
   };
 
   return (

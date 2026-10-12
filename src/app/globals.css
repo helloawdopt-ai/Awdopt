@@ -7,6 +7,8 @@
     color: var(--ink);
     font-family: var(--font-text);
     -webkit-text-size-adjust: 100%;
+    /* Keyboard focus never lands under the sticky bottom action bar (WCAG 2.2 focus not obscured). */
+    scroll-padding-bottom: calc(110px + env(safe-area-inset-bottom));
   }
   body {
     min-height: 100dvh;

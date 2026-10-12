@@ -12,20 +12,13 @@ const base =
   "disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none " +
   "aria-disabled:pointer-events-none aria-disabled:opacity-40 aria-disabled:shadow-none";
 
+// not-disabled: is :not(:disabled), so it also matches <a>.
 const variants: Record<Variant, string> = {
   primary:
-    "bg-primary shadow-sticker enabled:hover:-translate-px enabled:hover:shadow-sticker-lg enabled:active:translate-[2px] enabled:active:shadow-sticker-2",
+    "bg-primary shadow-sticker not-disabled:hover:-translate-px not-disabled:hover:shadow-sticker-lg not-disabled:active:translate-[2px] not-disabled:active:shadow-sticker-2",
   secondary:
-    "bg-surface enabled:hover:-translate-px enabled:hover:shadow-sticker-sm enabled:active:translate-[2px] enabled:active:shadow-none",
-  ghost: "border-transparent bg-transparent enabled:hover:border-ink enabled:active:translate-[2px]",
-};
-
-// <a> has no :enabled state, so links get the same effects unconditionally.
-const linkVariants: Record<Variant, string> = {
-  primary:
-    "bg-primary shadow-sticker hover:-translate-px hover:shadow-sticker-lg active:translate-[2px] active:shadow-sticker-2",
-  secondary: "bg-surface hover:-translate-px hover:shadow-sticker-sm active:translate-[2px] active:shadow-none",
-  ghost: "border-transparent bg-transparent hover:border-ink active:translate-[2px]",
+    "bg-surface not-disabled:hover:-translate-px not-disabled:hover:shadow-sticker-sm not-disabled:active:translate-[2px] not-disabled:active:shadow-none",
+  ghost: "border-transparent bg-transparent not-disabled:hover:border-ink not-disabled:active:translate-[2px]",
 };
 
 type ButtonProps = ComponentProps<"button"> & { variant?: Variant };
@@ -37,7 +30,7 @@ export function Button({ variant = "primary", className, type = "button", ...pro
 type ButtonLinkProps = ComponentProps<typeof Link> & { variant?: Variant };
 
 export function ButtonLink({ variant = "primary", className, ...props }: ButtonLinkProps) {
-  return <Link className={cx(base, linkVariants[variant], className)} {...props} />;
+  return <Link className={cx(base, variants[variant], className)} {...props} />;
 }
 
 type IconButtonProps = {

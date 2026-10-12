@@ -51,6 +51,22 @@ test("touch targets are at least 44px", async ({ page }) => {
   expect(small).toEqual([]);
 });
 
+test("keyboard focus is never hidden under the sticky bar", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/brand");
+  await page.locator("#b-name").focus();
+  for (let i = 0; i < 12; i++) {
+    await page.keyboard.press("Tab");
+    const hidden = await page.evaluate(() => {
+      const el = document.activeElement as HTMLElement | null;
+      const bar = document.querySelector<HTMLElement>(".sticky.bottom-0");
+      if (!el || !bar || bar.contains(el)) return false;
+      return el.getBoundingClientRect().bottom > bar.getBoundingClientRect().top;
+    });
+    expect(hidden).toBe(false);
+  }
+});
+
 test("/brand is hidden from search engines", async ({ request }) => {
   const res = await request.get("/brand");
   expect(res.headers()["x-robots-tag"]).toBe("noindex");

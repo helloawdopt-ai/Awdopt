@@ -1,20 +1,16 @@
 import { cx } from "@/lib/cx";
 
-type Props = { current: number; total?: number; section: string; prefix?: string };
+const TOTAL = 5;
 
 /** Five 8px segments: done Plum, current Tangerine with Plum outline, upcoming Plum 15%. */
-export function Progress({ current, total = 5, section, prefix }: Props) {
+export function Progress({ current, section, prefix }: { current: number; section: string; prefix?: string }) {
   return (
     <div className="flex grow flex-col gap-1.5">
       <span className="text-[13px] font-extrabold" aria-live="polite">
-        {prefix ? `${prefix} · ` : ""}Step {current} of {total} · {section}
+        {prefix ? `${prefix} · ` : ""}Step {current} of {TOTAL} · {section}
       </span>
-      <div
-        className="grid gap-1"
-        style={{ gridTemplateColumns: `repeat(${total}, minmax(0, 1fr))` }}
-        aria-hidden="true"
-      >
-        {Array.from({ length: total }, (_, i) => (
+      <div className="grid grid-cols-5 gap-1" aria-hidden="true">
+        {Array.from({ length: TOTAL }, (_, i) => (
           <span
             key={i}
             className={cx(

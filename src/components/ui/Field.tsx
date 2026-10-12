@@ -26,7 +26,7 @@ function Shell({ label, id, optional, error, hint, children }: Common & { childr
         </span>
       )}
       {error && (
-        <span id={`${id}-error`} className="flex items-start gap-2 text-sm">
+        <span id={`${id}-error`} role="alert" className="flex items-start gap-2 text-sm">
           <span
             aria-hidden="true"
             className="mt-px inline-flex size-5 shrink-0 items-center justify-center rounded-full border-[1.5px] border-ink bg-primary text-xs font-extrabold"

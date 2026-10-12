@@ -12,7 +12,8 @@
     "test": "vitest run",
     "contrast": "vitest run tests/contrast.test.ts",
     "e2e": "playwright test",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "js-size": "node scripts/js-size.mjs"
   },
   "dependencies": {
     "lucide-react": "^1.55.0",
