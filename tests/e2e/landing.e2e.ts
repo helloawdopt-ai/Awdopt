@@ -22,7 +22,7 @@ test("landing: one h1, both CTAs reach their pages", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Better Matches. Better Adoptions.");
   await page.getByRole("main").getByRole("link", { name: "Find a Dog" }).click();
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Browsing opens soon");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Dogs looking for a home");
   await page.goto("/");
   await page.getByRole("main").getByRole("link", { name: "List a Dog" }).first().click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Listing opens soon");
@@ -41,7 +41,7 @@ test("menu: opens, Esc closes and focus returns to the button", async ({ page })
 });
 
 test("placeholder pages are not indexed", async ({ page }) => {
-  for (const path of ["/dogs", "/list"]) {
+  for (const path of ["/list", "/match"]) {
     await page.goto(path);
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
   }
