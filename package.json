@@ -9,11 +9,12 @@
     "lint": "eslint",
     "logo": "node scripts/build-logo.mjs",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "node --env-file-if-exists=.env.local node_modules/vitest/vitest.mjs run",
     "contrast": "vitest run tests/contrast.test.ts",
     "e2e": "playwright test",
     "format": "prettier --write .",
-    "js-size": "node scripts/js-size.mjs"
+    "js-size": "node scripts/js-size.mjs",
+    "lhci": "node --env-file-if-exists=.env.local node_modules/@lhci/cli/src/cli.js autorun --config=lighthouserc.cjs"
   },
   "dependencies": {
     "lucide-react": "^1.55.0",
@@ -24,6 +25,7 @@
   },
   "devDependencies": {
     "@fontsource/unbounded": "^5.3.0",
+    "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.64.0",
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^24.19.2",
