@@ -425,6 +425,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      hit_rate_limit: {
+        Args: {
+          p_action: Database["public"]["Enums"]["rate_limit_action"]
+          p_ip_hash: string
+          p_max: number
+          p_window: string
+        }
+        Returns: boolean
+      }
       public_dogs: {
         Args: never
         Returns: {
@@ -458,6 +467,7 @@ export type Database = {
           video_url: string
         }[]
       }
+      submit_listing: { Args: { p: Json }; Returns: Json }
     }
     Enums: {
       adoption_timeline:

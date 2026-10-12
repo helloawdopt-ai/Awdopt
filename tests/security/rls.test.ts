@@ -99,17 +99,70 @@ async function upgradeToAal2(token: string) {
   return verified.access_token as string;
 }
 
+async function storage(path: string, init: RequestInit = {}) {
+  const res = await fetch(`${url}/storage/v1/${path}`, init);
+  const body = await res.text();
+  return { status: res.status, ok: res.ok, body };
+}
+
+// A WebP header is enough: the bucket checks the declared type and size, the app checks magic bytes.
+const WEBP = Buffer.concat([Buffer.from("RIFF\x10\x00\x00\x00WEBPVP8 ", "latin1"), Buffer.alloc(64)]);
+
+async function uploadSigned(path: string, body: Buffer, type: string) {
+  const sign = await storage(`object/upload/sign/listing-uploads/${path}`, {
+    method: "POST",
+    headers: service(),
+    body: "{}",
+  });
+  if (!sign.ok) throw new Error(`sign failed: ${sign.status}`);
+  const signed = JSON.parse(sign.body) as { url: string };
+  return storage(signed.url.replace(/^\//, ""), {
+    method: "PUT",
+    headers: { "Content-Type": type },
+    body: new Uint8Array(body),
+  });
+}
+
+const listing = (photos: unknown[] = [{ width: 1600, height: 1200, ext: "webp" }]) => ({
+  lister: { name: "Security Test Lister", phone: "+910000000099", email: null, relationship: "rescuer" },
+  dog: { name: "Security Test Dog", locality: "Bandra", size: "small", good_with_cats: null },
+  photos,
+});
+
 let nonAdmin = "";
 let adminAal1 = "";
 let adminAal2 = "";
+let testDog = "";
+let uploadPath = "";
 
 beforeAll(async () => {
   nonAdmin = await makeUser({});
   adminAal1 = await makeUser({ role: "admin" });
   adminAal2 = await upgradeToAal2(await makeUser({ role: "admin" }));
+  // A pending listing with one uploaded photo, as the listing form leaves it.
+  const r = await fetch(`${url}/rest/v1/rpc/submit_listing`, {
+    method: "POST",
+    headers: service(),
+    body: JSON.stringify({ p: listing() }),
+  });
+  const out = (await r.json()) as { dog_id: string; paths: string[][] };
+  testDog = out.dog_id;
+  uploadPath = out.paths[0]![0]!;
+  expect((await uploadSigned(uploadPath, WEBP, "image/webp")).ok).toBe(true);
 }, 30_000);
 
 afterAll(async () => {
+  await storage("object/listing-uploads", {
+    method: "DELETE",
+    headers: service(),
+    body: JSON.stringify({ prefixes: [uploadPath] }),
+  });
+  if (testDog) {
+    const dog = await rest(`dogs?id=eq.${testDog}&select=lister_id`, { headers: service() });
+    const lister = (dog.rows?.[0] as { lister_id: string } | undefined)?.lister_id;
+    await rest(`dogs?id=eq.${testDog}`, { method: "DELETE", headers: service() });
+    if (lister) await rest(`listers?id=eq.${lister}`, { method: "DELETE", headers: service() });
+  }
   await Promise.all(
     users.map((id) => fetch(`${url}/auth/v1/admin/users/${id}`, { method: "DELETE", headers: service() })),
   );
@@ -139,6 +192,35 @@ describe.each([0, 1, 2])("denied caller #%i", (i) => {
   it("cannot call the server-only public_dogs function", async () => {
     const [, token] = caller();
     expect((await rest("rpc/public_dogs", { headers: headers(token) })).ok).toBe(false);
+  });
+
+  it("cannot call the server-only write functions", async () => {
+    const [, token] = caller();
+    const h = headers(token);
+    expect(
+      (await rest("rpc/submit_listing", { method: "POST", headers: h, body: JSON.stringify({ p: listing() }) })).ok,
+    ).toBe(false);
+    const limit = { p_action: "listing", p_ip_hash: "\\x" + "00".repeat(32), p_max: 100, p_window: "1 hour" };
+    expect((await rest("rpc/hit_rate_limit", { method: "POST", headers: h, body: JSON.stringify(limit) })).ok).toBe(
+      false,
+    );
+  });
+
+  it("cannot list, read or write photo storage", async () => {
+    const [, token] = caller();
+    const h = headers(token);
+    for (const bucket of ["listing-uploads", "dog-photos"]) {
+      const list = await storage(`object/list/${bucket}`, { method: "POST", headers: h, body: '{"prefix":""}' });
+      expect(!list.ok || list.body === "[]", bucket).toBe(true);
+      const put = await storage(`object/${bucket}/${testDog}/x.webp`, {
+        method: "POST",
+        headers: { ...h, "Content-Type": "image/webp" },
+        body: WEBP,
+      });
+      expect(put.ok, bucket).toBe(false);
+    }
+    expect((await storage(`object/authenticated/listing-uploads/${uploadPath}`, { headers: h })).ok).toBe(false);
+    expect((await storage(`object/public/listing-uploads/${uploadPath}`)).ok).toBe(false);
   });
 
   it("cannot write to any table", async () => {
@@ -174,6 +256,11 @@ describe("allowed paths", () => {
     }
   });
 
+  it("an aal2 admin can read pending uploads", async () => {
+    const r = await storage(`object/authenticated/listing-uploads/${uploadPath}`, { headers: headers(adminAal2) });
+    expect(r.ok).toBe(true);
+  });
+
   it("an aal2 admin still cannot touch rate_limits", async () => {
     expect((await rest("rate_limits?select=*", { headers: headers(adminAal2) })).ok).toBe(false);
   });
@@ -192,5 +279,54 @@ describe("allowed paths", () => {
     ).toBe(true);
     for (const leak of ["lister_id", "admin_notes", "status", "approved_at", "updated_at"])
       expect(rows[0], leak).not.toHaveProperty(leak);
+  });
+});
+
+describe("server-only write functions", () => {
+  const rpc = (fn: string, body: unknown) =>
+    rest(`rpc/${fn}`, { method: "POST", headers: service(), body: JSON.stringify(body) });
+
+  it("submit_listing creates a pending dog that stays out of public_dogs", async () => {
+    const dog = await rest(`dogs?id=eq.${testDog}&select=status,slug,admin_notes`, { headers: service() });
+    expect(dog.rows?.[0]).toMatchObject({ status: "pending", admin_notes: null });
+    expect((dog.rows?.[0] as { slug: string }).slug).toMatch(/^security-test-dog-[0-9a-f]{6}$/);
+    const pub = await rest(`rpc/public_dogs?id=eq.${testDog}&select=id`, { headers: service() });
+    expect(pub.rows).toEqual([]);
+    expect(uploadPath).toMatch(new RegExp(`^${testDog}/[0-9a-f-]{36}-480\\.webp$`));
+  });
+
+  it("submit_listing rejects bad input", async () => {
+    expect((await rpc("submit_listing", { p: listing([]) })).ok).toBe(false);
+    expect((await rpc("submit_listing", { p: listing(Array(7).fill({ width: 1, height: 1, ext: "webp" })) })).ok).toBe(
+      false,
+    );
+    expect((await rpc("submit_listing", { p: listing([{ width: 1, height: 1, ext: "svg" }]) })).ok).toBe(false);
+    const bad = listing();
+    bad.lister.phone = "98765";
+    expect((await rpc("submit_listing", { p: bad })).ok).toBe(false);
+  });
+
+  it("hit_rate_limit allows max calls per window, then refuses", async () => {
+    const hash = "\\x" + randomBytes(32).toString("hex");
+    const body = { p_action: "listing", p_ip_hash: hash, p_max: 3, p_window: "1 hour" };
+    const results = [];
+    for (let i = 0; i < 4; i++)
+      results.push(
+        await (
+          await fetch(`${url}/rest/v1/rpc/hit_rate_limit`, {
+            method: "POST",
+            headers: service(),
+            body: JSON.stringify(body),
+          })
+        ).json(),
+      );
+    expect(results).toEqual([true, true, true, false]);
+    await rest(`rate_limits?ip_hash=eq.${encodeURIComponent(hash)}`, { method: "DELETE", headers: service() });
+  });
+
+  it("listing-uploads refuses other file types and files over 2MB", async () => {
+    const path = `${testDog}/${randomBytes(8).toString("hex")}`;
+    expect((await uploadSigned(`${path}.txt`, Buffer.from("hello"), "text/plain")).ok).toBe(false);
+    expect((await uploadSigned(`${path}.webp`, Buffer.alloc(2 * 1024 * 1024 + 1), "image/webp")).ok).toBe(false);
   });
 });
