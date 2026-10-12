@@ -1,0 +1,57 @@
+@import "tailwindcss";
+@import "./tokens.css";
+
+@layer base {
+  html {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-text);
+    -webkit-text-size-adjust: 100%;
+    /* Keyboard focus never lands under the sticky bottom action bar (WCAG 2.2 focus not obscured). */
+    scroll-padding-bottom: calc(110px + env(safe-area-inset-bottom));
+  }
+  body {
+    min-height: 100dvh;
+    background: var(--bg);
+  }
+  a {
+    color: var(--ink);
+  }
+  :focus-visible {
+    outline: 3px solid var(--ink);
+    outline-offset: 3px;
+  }
+  /* Dark surfaces add a Butter inner ring (DESIGN.md §13). */
+  .on-dark :focus-visible {
+    box-shadow: inset 0 0 0 3px var(--highlight);
+  }
+  /* Inputs never below 16px, to prevent iOS zoom. */
+  input,
+  select,
+  textarea {
+    font-size: max(16px, 1em);
+  }
+}
+
+/* Reduced motion: instant state changes, colour changes kept. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Timing for the hard "press into the page" (components add active:translate-[2px]). */
+@utility press {
+  transition-property: translate, box-shadow, background-color;
+  transition-duration: var(--dur-press);
+  transition-timing-function: ease-out;
+}
