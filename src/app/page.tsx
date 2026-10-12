@@ -1,5 +1,4 @@
-import { Sparkle } from "@/components/brand/Glyphs";
-import { DogPhoto } from "@/components/dog/DogPhoto";
+import { DogSticker, Sparkle } from "@/components/brand/Glyphs";
 import { ButtonLink } from "@/components/ui/Button";
 import { SiteHeader } from "@/components/ui/SiteHeader";
 import { SiteMenu } from "@/components/ui/SiteMenu";
@@ -32,7 +31,10 @@ function HeroPoster() {
       className="relative h-80 shrink-0 overflow-hidden rounded-[28px] border-[2.5px] border-ink bg-fresh lg:h-[440px]"
     >
       <div className="absolute top-[34px] left-[34px] flex w-[196px] -rotate-6 flex-col gap-2.5 rounded-[14px] border-[2.5px] border-ink bg-surface p-2.5 pb-3 shadow-sticker-6 lg:top-14 lg:left-16 lg:w-[250px]">
-        <DogPhoto name="Bruno" className="h-44 rounded-lg lg:h-56" />
+        {/* Illustration until the client sends a real dog photo (then: AVIF poster, fetchpriority high). */}
+        <div className="h-44 overflow-hidden rounded-lg bg-highlight lg:h-56">
+          <DogSticker className="size-full" />
+        </div>
         <p className="text-[15px] font-bold">Bruno, 2 · Indie</p>
       </div>
       <p className="absolute top-[150px] right-[18px] rotate-6 rounded-[22px] border-[2.5px] border-ink bg-bubble px-4 py-3 font-display text-base leading-[1.2] font-bold shadow-sticker lg:top-52 lg:right-16 lg:text-xl">
@@ -126,6 +128,12 @@ export default function Home() {
           <Link href="/privacy" className="inline-flex min-h-11 items-center font-bold">
             Privacy
           </Link>
+          <Link href="/privacy#your-data" className="inline-flex min-h-11 items-center font-bold">
+            How we use your data
+          </Link>
+          <a href="mailto:hello.awdopt@gmail.com" className="inline-flex min-h-11 items-center font-bold">
+            Contact
+          </a>
         </nav>
         <p>Mumbai pilot · AWDOPT</p>
       </footer>

@@ -41,7 +41,7 @@ test("menu: opens, Esc closes and focus returns to the button", async ({ page })
 });
 
 test("placeholder pages are not indexed", async ({ page }) => {
-  for (const path of ["/dogs", "/list", "/privacy"]) {
+  for (const path of ["/dogs", "/list"]) {
     await page.goto(path);
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
   }
@@ -58,4 +58,14 @@ test("every interactive target on / is at least 44px", async ({ page }) => {
       .map(({ text }) => text),
   );
   expect(small).toEqual([]);
+});
+
+test("privacy notice and footer contact", async ({ page }) => {
+  await page.goto("/");
+  const footer = page.getByRole("navigation", { name: "Footer" });
+  await expect(footer.getByRole("link", { name: "Contact" })).toHaveAttribute("href", "mailto:hello.awdopt@gmail.com");
+  await footer.getByRole("link", { name: "How we use your data" }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Privacy notice");
+  await expect(page.getByRole("heading", { name: "What we collect" })).toBeVisible();
+  await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
 });
