@@ -379,3 +379,27 @@ No hex values anywhere outside this file. There is no dark mode in V1, so the th
 | Calm, plain copy around personal data | Jokes near consent, errors or privacy |
 | Real dog photos as the hero of every card | Stock photos or AI-generated dogs |
 | Up to 2 sparkles in a hero or success moment | Sparkles on every screen |
+
+---
+
+## 16. Additions
+
+Approved Oct 2026, after the design-system build.
+
+**Hover.** Only under `@media (hover: hover)`, so touch devices never get stuck hover states. Hover never replaces the focus style.
+- Shadowed controls and cards lift 1px up and left, and their hard shadow grows by 1px.
+- Shadowless secondary buttons gain a 3px hard shadow.
+- Chips, option cards and segments fill Oat Milk.
+- Ghost buttons gain a Plum border.
+
+**Skeleton.** Oat Milk blocks with a 2px dashed Plum border at 20% opacity, at the exact final size so nothing shifts when content arrives. No shimmer. Used for discovery cards, the profile, results and admin tables.
+
+**Empty state.** A White panel with a 2.5px Plum border, a Display S heading, one Body line and one secondary action (for example "Clear filters"). No sparkles: it is not a success moment.
+
+**Async error state.** A calm zone. Plum text with the Tangerine-circle alert icon, one plain sentence saying what failed, and a "Try again" secondary button. No jokes.
+
+**Implementation notes.**
+- Touch targets are at least 44px even where an earlier screen shows less: chips are 44px, and admin buttons and selects are 44px below 1024px wide.
+- The photo-remove × is drawn at 28px with a 44px hit area.
+- A missing dog photo shows the tinted placeholder with "Photo coming soon".
+- Dog names on cards use Display S (20px).
