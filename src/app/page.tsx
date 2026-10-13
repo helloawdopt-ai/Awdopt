@@ -1,4 +1,5 @@
 import { DogSticker, Sparkle } from "@/components/brand/Glyphs";
+import { Hero3D } from "@/components/hero/Hero3D";
 import { ButtonLink } from "@/components/ui/Button";
 import { SiteHeader } from "@/components/ui/SiteHeader";
 import { SiteMenu } from "@/components/ui/SiteMenu";
@@ -23,19 +24,19 @@ const steps = [
   },
 ];
 
-// M1 poster: the hero sticker scene as plain HTML/CSS. M2 swaps in the 3D "Sticker Flip" at the same size.
+// The poster is the LCP-safe first paint and the fallback (reduced motion, low-end, no WebGL).
+// Hero3D swaps in the 3D "Sticker Flip" over it when the page is idle (DESIGN.md §10).
 function HeroPoster() {
   return (
-    <div
-      aria-hidden="true"
-      className="relative h-80 shrink-0 overflow-hidden rounded-[28px] border-[2.5px] border-ink bg-fresh lg:h-[440px]"
-    >
+    <Hero3D className="h-80 shrink-0 rounded-[28px] border-[2.5px] border-ink bg-fresh lg:h-[440px]">
       <div className="absolute top-[34px] left-[34px] flex w-[196px] -rotate-6 flex-col gap-2.5 rounded-[14px] border-[2.5px] border-ink bg-surface p-2.5 pb-3 shadow-sticker-6 lg:top-14 lg:left-16 lg:w-[250px]">
         {/* Illustration until the client sends a real dog photo (then: AVIF poster, fetchpriority high). */}
-        <div className="h-44 overflow-hidden rounded-lg bg-highlight lg:h-56">
+        <div data-hero-photo className="h-44 overflow-hidden rounded-lg bg-highlight lg:h-56">
           <DogSticker className="size-full" />
         </div>
-        <p className="text-[15px] font-bold">Bruno, 2 · Indie</p>
+        <p data-hero-caption className="text-[15px] font-bold">
+          Bruno, 2 · Indie
+        </p>
       </div>
       <p className="absolute top-[150px] right-[18px] rotate-6 rounded-[22px] border-[2.5px] border-ink bg-bubble px-4 py-3 font-display text-base leading-[1.2] font-bold shadow-sticker lg:top-52 lg:right-16 lg:text-xl">
         aww.
@@ -44,7 +45,7 @@ function HeroPoster() {
       </p>
       <Sparkle size={38} className="absolute top-9 right-11 fill-highlight" />
       <Sparkle size={26} className="absolute bottom-[22px] left-5 fill-primary" />
-    </div>
+    </Hero3D>
   );
 }
 
