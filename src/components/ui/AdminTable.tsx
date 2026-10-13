@@ -11,7 +11,8 @@ export function AdminTable({ label, children }: { label: string; children: React
       aria-label={label}
       tabIndex={0}
       className={
-        "overflow-x-auto rounded-[16px] border-2 border-ink bg-surface " +
+        // relative: keeps absolutely positioned content (sr-only headers) inside the scroll area.
+        "relative overflow-x-auto rounded-[16px] border-2 border-ink bg-surface " +
         "[&_table]:w-full [&_table]:border-collapse [&_table]:text-sm " +
         "[&_th]:bg-bg [&_th]:px-3.5 [&_th]:py-2.5 [&_th]:text-left [&_th]:whitespace-nowrap " +
         "[&_td]:px-3.5 [&_td]:py-2 [&_tbody_tr]:border-t-[1.5px] [&_tbody_tr]:border-row-line"

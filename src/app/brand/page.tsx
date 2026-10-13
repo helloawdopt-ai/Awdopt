@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/lib/server/auth";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
@@ -53,7 +54,9 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-export default function BrandPage() {
+export default async function BrandPage() {
+  // Internal component preview: admins only (DESIGN.md Step 0 note).
+  await requireAdmin();
   if (process.env.VERCEL_ENV === "production") notFound();
 
   return (

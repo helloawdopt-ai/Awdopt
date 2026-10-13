@@ -14,7 +14,8 @@ export default defineConfig({
   webServer: process.env.E2E_BASE_URL
     ? undefined
     : {
-        command: `npm run build && npm run start -- -p ${PORT}`,
+        // Clear the data cache first: tests change dev data behind it (fixtures are deleted directly).
+        command: `rm -rf .next/cache/fetch-cache && npm run build && npm run start -- -p ${PORT}`,
         port: PORT,
         timeout: 240_000,
         reuseExistingServer: true,

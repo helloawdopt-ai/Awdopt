@@ -30,6 +30,13 @@ const nextConfig: NextConfig = {
         ],
       },
       { source: "/brand", headers: [{ key: "X-Robots-Tag", value: "noindex" }] },
+      {
+        source: "/admin/:path*",
+        headers: [
+          { key: "X-Robots-Tag", value: "noindex" },
+          { key: "Cache-Control", value: "private, no-store" },
+        ],
+      },
     ];
   },
 };

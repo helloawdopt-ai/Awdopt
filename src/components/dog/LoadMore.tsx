@@ -42,7 +42,7 @@ export function LoadMore({
 
   return (
     <>
-      <ul className="grid gap-[18px] md:grid-cols-2 xl:grid-cols-3">
+      <ul className="grid grid-cols-[minmax(0,1fr)] gap-[18px] md:grid-cols-2 xl:grid-cols-3">
         {children}
         {pages}
       </ul>

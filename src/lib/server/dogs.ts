@@ -81,8 +81,12 @@ async function fetchDogs(filters: Filters, cursor: string | null) {
   };
 }
 
-/** A page of approved dogs. Cached until an admin approves, edits or removes a dog (tag "dogs"). */
-export const listDogs = unstable_cache(fetchDogs, ["dogs-list"], { tags: ["dogs"] });
+// Admin actions refresh the cache at once (updateTag("dogs")). The 5-minute revalidate is a safety
+// net for changes made outside the app, e.g. in the Supabase dashboard.
+const CACHE = { tags: ["dogs"], revalidate: 300 };
+
+/** A page of approved dogs, cached under the "dogs" tag. */
+export const listDogs = unstable_cache(fetchDogs, ["dogs-list"], CACHE);
 
 export const getDog = unstable_cache(
   async (slug: string) => {
@@ -91,5 +95,5 @@ export const getDog = unstable_cache(
     return data as unknown as PublicDog | null;
   },
   ["dog"],
-  { tags: ["dogs"] },
+  CACHE,
 );

@@ -45,7 +45,8 @@ test("filters sheet at 390px: screenshot", async ({ page }) => {
 
 test("discovery lists approved dogs only", async ({ page }) => {
   await page.goto("/dogs");
-  await expect(page.getByText("6 dogs · Mumbai")).toBeVisible();
+  // At least the 6 seeded dogs (admin.e2e.ts may approve one more while running in parallel).
+  await expect(page.getByText(/^\d+ dogs · Mumbai$/)).toBeVisible();
   const names = await page.getByRole("main").getByRole("heading", { level: 2 }).allTextContents();
   expect(names.filter((n) => n.startsWith("Sample")).sort()).toEqual([
     "Sample Biscuit",

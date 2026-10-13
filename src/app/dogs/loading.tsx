@@ -14,7 +14,7 @@ export default function Loading() {
         <div className="flex flex-col gap-3.5">
           <Skeleton className="h-[52px] w-3/4 rounded-[12px]" />
           <Skeleton className="h-11 w-32 rounded-full lg:hidden" />
-          <div className="grid gap-[18px] md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-[18px] md:grid-cols-2 xl:grid-cols-3">
             {[0, 1, 2].map((i) => (
               <Skeleton key={i} className="h-[340px]" />
             ))}
