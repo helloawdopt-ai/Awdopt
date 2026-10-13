@@ -30,7 +30,7 @@ export async function submitListing(values: unknown, photos: unknown, turnstileT
   const phone = toE164(v.lister_phone);
   if (!phone) return { ok: false, error: "Check the phone number.", field: "lister_phone" };
 
-  const { data, error } = await service.rpc("submit_listing", {
+  const { data, error } = await service().rpc("submit_listing", {
     p: {
       lister: { name: v.lister_name, phone, email: v.lister_email || null, relationship: v.relationship },
       dog: toDog(v),
@@ -40,7 +40,7 @@ export async function submitListing(values: unknown, photos: unknown, turnstileT
   if (error || !data) return { ok: false, error: GENERIC };
 
   const paths = (data as { paths: string[][] }).paths;
-  const bucket = service.storage.from("listing-uploads");
+  const bucket = service().storage.from("listing-uploads");
   try {
     const uploads = await Promise.all(
       paths.map((sizes) =>

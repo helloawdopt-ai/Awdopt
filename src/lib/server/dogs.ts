@@ -37,7 +37,7 @@ const CURSOR =
 export const isCursor = (c: unknown): c is string => typeof c === "string" && CURSOR.test(c);
 
 async function fetchDogs(filters: Filters, cursor: string | null) {
-  let q = service
+  let q = service()
     .rpc("public_dogs", undefined, { get: true, count: cursor ? undefined : "exact" })
     .select(CARD_COLUMNS)
     .order("created_at", { ascending: false })
@@ -90,7 +90,7 @@ export const listDogs = unstable_cache(fetchDogs, ["dogs-list"], CACHE);
 
 export const getDog = unstable_cache(
   async (slug: string) => {
-    const { data, error } = await service.rpc("public_dogs", undefined, { get: true }).eq("slug", slug).maybeSingle();
+    const { data, error } = await service().rpc("public_dogs", undefined, { get: true }).eq("slug", slug).maybeSingle();
     if (error) throw new Error("Could not load dog");
     return data as unknown as PublicDog | null;
   },

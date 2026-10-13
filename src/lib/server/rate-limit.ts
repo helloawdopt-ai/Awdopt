@@ -21,7 +21,7 @@ export async function underRateLimit(action: Action, ip: string | null) {
   const hash = createHash("sha256")
     .update(`${salt}:${ip ?? "unknown"}`)
     .digest("hex");
-  const { data, error } = await service.rpc("hit_rate_limit", {
+  const { data, error } = await service().rpc("hit_rate_limit", {
     p_action: action,
     p_ip_hash: `\\x${hash}`,
     p_max: LIMITS[action],

@@ -37,7 +37,7 @@ export function DogPhoto({
       role="img"
       aria-label={`No photo of ${name} yet`}
       className={cx(
-        "flex flex-col items-center justify-center gap-1.5 text-muted",
+        "flex flex-col items-center justify-center gap-1.5 text-ink",
         tints[tint % tints.length],
         className,
       )}
