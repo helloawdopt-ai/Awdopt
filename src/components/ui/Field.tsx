@@ -25,17 +25,7 @@ function Shell({ label, id, optional, error, hint, children }: Common & { childr
           {hint}
         </span>
       )}
-      {error && (
-        <span id={`${id}-error`} role="alert" className="flex items-start gap-2 text-sm">
-          <span
-            aria-hidden="true"
-            className="mt-px inline-flex size-5 shrink-0 items-center justify-center rounded-full border-[1.5px] border-ink bg-primary text-xs font-extrabold"
-          >
-            !
-          </span>
-          {error}
-        </span>
-      )}
+      <FieldError id={`${id}-error`} error={error} />
     </div>
   );
 }
@@ -92,5 +82,47 @@ export function Checkbox({
       <input id={id} type="checkbox" className="mt-px size-6 shrink-0 accent-primary" {...props} />
       <label htmlFor={id}>{children}</label>
     </div>
+  );
+}
+
+/** Native select styled like an input (52px, Plum border). Native keeps mobile pickers and a11y. */
+export function Select({
+  label,
+  id,
+  optional,
+  error,
+  hint,
+  className,
+  children,
+  ...props
+}: Common & ComponentProps<"select">) {
+  return (
+    <Shell {...{ label, id, optional, error, hint }}>
+      <select
+        id={id}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={describedBy(id, error, hint)}
+        className={cx(control, "h-[52px] appearance-auto", className)}
+        {...props}
+      >
+        {children}
+      </select>
+    </Shell>
+  );
+}
+
+/** Error line for fieldsets (radio groups), matching Shell's error style. */
+export function FieldError({ id, error }: { id: string; error?: string }) {
+  if (!error) return null;
+  return (
+    <span id={id} role="alert" className="flex items-start gap-2 text-sm">
+      <span
+        aria-hidden="true"
+        className="mt-px inline-flex size-5 shrink-0 items-center justify-center rounded-full border-[1.5px] border-ink bg-primary text-xs font-extrabold"
+      >
+        !
+      </span>
+      {error}
+    </span>
   );
 }

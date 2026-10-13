@@ -182,7 +182,7 @@ export default function BrandPage() {
             </a>
           </Checkbox>
           <TrustLine>Only the AWDOPT team sees your contact details. Never shown publicly.</TrustLine>
-          <PhotoUploader />
+          <PhotoUploader previews={[]} />
         </Section>
 
         <Section title="Dogs and matches">
