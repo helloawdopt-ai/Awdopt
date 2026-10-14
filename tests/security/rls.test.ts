@@ -194,6 +194,19 @@ describe.each([0, 1, 2])("denied caller #%i", (i) => {
     );
   });
 
+  it("cannot call the server-only matching functions", async () => {
+    const [, token] = caller();
+    const h = headers(token);
+    const adopter = { p_adopter_id: "00000000-0000-4000-c000-000000000001" };
+    expect(
+      (await rest("rpc/score_dogs_for_adopter", { method: "POST", headers: h, body: JSON.stringify(adopter) })).ok,
+    ).toBe(false);
+    const link = { p_token_hash: "\\x" + "00".repeat(32) };
+    expect((await rest("rpc/results_for_token", { method: "POST", headers: h, body: JSON.stringify(link) })).ok).toBe(
+      false,
+    );
+  });
+
   it("cannot list, read or write photo storage", async () => {
     const [, token] = caller();
     const h = headers(token);

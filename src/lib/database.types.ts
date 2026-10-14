@@ -467,6 +467,23 @@ export type Database = {
           video_url: string
         }[]
       }
+      results_for_token: {
+        Args: { p_slug?: string; p_token_hash: string }
+        Returns: Json
+      }
+      score_dogs_for_adopter: {
+        Args: { p_adopter_id: string }
+        Returns: {
+          categories: Json
+          confidence: number
+          consider: string[]
+          dog_id: string
+          excluded_by: string[]
+          rank: number
+          score: number
+          why: string[]
+        }[]
+      }
       submit_listing: { Args: { p: Json }; Returns: Json }
     }
     Enums: {
