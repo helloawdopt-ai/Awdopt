@@ -125,6 +125,9 @@ export const STEPS = [
 ] as const;
 export type StepSlug = (typeof STEPS)[number]["slug"];
 
+/** Name, phone and email kept for this tab after submit, to prefill "I'm Interested". Never sent to /r pages. */
+export const CONTACT_KEY = "awdopt-contact";
+
 export const EMPTY_ANSWERS = {
   name: "",
   age: "",

@@ -1,4 +1,5 @@
 import "server-only";
+import { headers } from "next/headers";
 import type { Database } from "@/lib/database.types";
 import type { PhotoRow } from "@/lib/photo-url";
 import { isToken, tokenHash } from "./results-token";
@@ -78,4 +79,12 @@ export async function getResults(token: string, slug?: string): Promise<Results 
   });
   if (error) throw new Error("Could not load matches");
   return data as Results | null;
+}
+
+/** The private link to show and share, on whatever host served this page (preview, production, domain). */
+export async function shareUrl(token: string) {
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host");
+  const proto = h.get("x-forwarded-proto") ?? "https";
+  return `${proto}://${host}/r/${token}`;
 }

@@ -69,3 +69,18 @@ describe("toAdopter", () => {
     });
   });
 });
+
+describe("enquirySchema", async () => {
+  const { enquirySchema } = await import("@/lib/enquiry-schema");
+  const ok = { name: "Test Adopter", phone: "98200 12345", email: "", message: "", consent: true };
+  const fields = (v: object) => enquirySchema.safeParse(v).error?.issues.map((i) => i.path[0]) ?? [];
+
+  it("needs a name, a phone and the unticked consent box; email and message are optional", () => {
+    expect(fields(ok)).toEqual([]);
+    expect(fields({ ...ok, name: " ", phone: "12", consent: false })).toEqual(["name", "phone", "consent"]);
+  });
+
+  it("limits the message to 1,000 characters", () => {
+    expect(fields({ ...ok, message: "x".repeat(1001) })).toEqual(["message"]);
+  });
+});

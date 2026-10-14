@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Info } from "lucide-react";
@@ -11,20 +10,12 @@ import { EmptyState } from "@/components/ui/States";
 import { ageLabel } from "@/lib/dog-format";
 import { excludedLine, explain } from "@/lib/explanations";
 import { preloadPhoto, toPhoto } from "@/lib/photo-url";
-import { getResults } from "@/lib/server/matches";
+import { getResults, shareUrl } from "@/lib/server/matches";
 
 // Private: /r/* also sends no-referrer, no-store and X-Robots-Tag: noindex (next.config.ts).
 export const metadata: Metadata = { title: "Your matches", robots: { index: false, follow: false } };
 
 type Props = { params: Promise<{ token: string }> };
-
-/** The link to show and share, on whatever host served this page (preview, production, custom domain). */
-async function shareUrl(token: string) {
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host");
-  const proto = h.get("x-forwarded-proto") ?? "https";
-  return `${proto}://${host}/r/${token}`;
-}
 
 export default async function Page({ params }: Props) {
   const { token } = await params;

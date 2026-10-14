@@ -170,10 +170,75 @@ test("questionnaire: 5 steps, progress kept on refresh, 18+, consent, results li
   await shot(page, "profile-from-results-390");
   await page.setViewportSize({ width: 1440, height: 900 });
   await shot(page, "profile-from-results-1440");
+
+  // I'm Interested: prefilled from this tab's answers, unticked consent, Turnstile, then sent.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole("link", { name: /I.m Interested/ }).click();
+  await expect(page).toHaveURL(/\/interested$/);
+  await expect(page.getByText("We filled this in from your answers.")).toBeVisible();
+  await expect(page.getByLabel("Your name")).toHaveValue("E2E Adopter");
+  await expect(page.getByLabel("Phone / WhatsApp")).toHaveValue(PHONE);
+  await page.getByRole("button", { name: "Send my interest" }).click();
+  await expect(page.getByText("Please confirm so the team can contact you")).toBeVisible();
+  await page.getByLabel("Message").fill("E2E test message");
+  await page.getByRole("checkbox", { name: /I agree to AWDOPT using these details/ }).check();
+  await expect(page.locator('input[name="cf-turnstile-response"]')).toHaveValue(/.+/, { timeout: 20_000 });
+  for (const [w, hgt] of [
+    [390, 844],
+    [360, 800],
+    [768, 1024],
+    [1440, 900],
+  ] as const) {
+    await page.setViewportSize({ width: w, height: hgt });
+    await shot(page, `interested-${w}`);
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole("button", { name: "Send my interest" }).click();
+  await expect(page.getByRole("heading", { name: "interest sent!" })).toBeVisible();
+  await expect(page.getByText("Your private matches link")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Back to my matches" })).toHaveAttribute("href", new URL(link).pathname);
+  await shot(page, "sent-390");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await shot(page, "sent-1440");
   expect(violations).toEqual([]);
 
+  // Stored for the admin with a score snapshot; a second open enquiry for the same dog is refused.
+  const [adopter] = (await (
+    await fetch(`${url}/rest/v1/adopters?phone=eq.${encodeURIComponent(E164)}&select=id`, { headers: h })
+  ).json()) as { id: string }[];
+  const enquiries = (await (
+    await fetch(
+      `${url}/rest/v1/enquiries?adopter_id=eq.${adopter!.id}&select=phone,message,status,score,weights,dogs(slug)`,
+      { headers: h },
+    )
+  ).json()) as {
+    phone: string;
+    message: string;
+    status: string;
+    score: number;
+    weights: object;
+    dogs: { slug: string };
+  }[];
+  expect(enquiries).toHaveLength(1);
+  expect(enquiries[0]).toMatchObject({ phone: E164, message: "E2E test message", status: "interested" });
+  expect(enquiries[0]!.score).toBeGreaterThan(0);
+  expect(Object.keys(enquiries[0]!.weights)).toHaveLength(8);
+
+  await page.goto(`${new URL(link).pathname}/${enquiries[0]!.dogs.slug}/interested`);
+  await page.getByRole("checkbox", { name: /I agree to AWDOPT using these details/ }).check();
+  await expect(page.locator('input[name="cf-turnstile-response"]')).toHaveValue(/.+/, { timeout: 20_000 });
+  await page.getByRole("button", { name: "Send my interest" }).click();
+  await expect(page.getByText("You've already told us you're interested in this dog.")).toBeVisible();
+
+  // A new tab has nothing to prefill from: the link never reveals contact details.
+  const fresh = await page.context().newPage();
+  await fresh.goto(`${new URL(link).pathname}/${enquiries[0]!.dogs.slug}/interested`);
+  await expect(fresh.getByLabel("Your name")).toHaveValue("");
+  await expect(fresh.getByText("We filled this in from your answers.")).toHaveCount(0);
+  await fresh.close();
+
   // A dog this adopter can't be matched with isn't reachable through the link.
-  for (const path of ["/sample-tofu", "/sample-tofu/profile", "/no-such-dog"])
+  for (const path of ["/sample-tofu", "/sample-tofu/profile", "/sample-tofu/interested", "/no-such-dog"])
     expect((await page.request.get(link + path)).status()).toBe(404);
 
   // Stored once, with a 90-day link and the E.164 number.
@@ -188,7 +253,13 @@ test("questionnaire: 5 steps, progress kept on refresh, 18+, consent, results li
 
 test("results links are private: headers, wrong and malformed tokens", async ({ page, request }) => {
   const wrong = `/r/${randomBytes(32).toString("base64url")}`;
-  for (const path of [wrong, "/r/not-a-token", `${wrong}/sample-biscuit`, `${wrong}/sample-biscuit/profile`]) {
+  for (const path of [
+    wrong,
+    "/r/not-a-token",
+    `${wrong}/sample-biscuit`,
+    `${wrong}/sample-biscuit/profile`,
+    `${wrong}/sample-biscuit/interested`,
+  ]) {
     const res = await request.get(path);
     expect(res.status()).toBe(404);
     const hd = res.headers();

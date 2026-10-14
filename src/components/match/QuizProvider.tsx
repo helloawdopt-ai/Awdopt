@@ -5,11 +5,9 @@ import { createContext, useContext, useEffect, useRef, useState, useTransition, 
 import { useForm, type Resolver, type UseFormReturn } from "react-hook-form";
 import { submitQuestionnaire } from "@/app/match/actions";
 import type { Answers } from "@/lib/match-schema";
-import { EMPTY_ANSWERS, STEPS } from "@/lib/questionnaire";
+import { CONTACT_KEY, EMPTY_ANSWERS, STEPS } from "@/lib/questionnaire";
 
 const KEY = "awdopt-match";
-/** Name, phone and email kept for this tab after submit, to prefill "I'm Interested". Never sent to /r pages. */
-export const CONTACT_KEY = "awdopt-contact";
 /** Long enough for the 8 category ticks (120ms apart) to land before the results replace the screen. */
 const MIN_MATCHING_MS = 1300;
 
