@@ -18,6 +18,7 @@ test.afterAll(cleanup);
 
 async function shot(page: Page, name: string) {
   await page.evaluate(() => document.fonts.ready);
+  await page.waitForFunction(() => [...document.images].every((img) => img.complete));
   await page.screenshot({ path: `docs/private/reviews/M3/${name}.png`, fullPage: true });
 }
 const group = (page: Page, name: string) => page.getByRole("group", { name });
@@ -122,7 +123,58 @@ test("questionnaire: 5 steps, progress kept on refresh, 18+, consent, results li
     await page.setViewportSize({ width: w, height: hgt });
     await shot(page, `results-${w}`);
   }
+
+  // Match detail: all 8 bars, explanations, and empty bars named for what they are.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await rows.first().getByRole("link").click();
+  await expect(page).toHaveURL(/\/r\/[A-Za-z0-9_-]{43}\/sample-[a-z]+$/);
+  const bars = page.getByRole("region", { name: "Score by category" });
+  for (const label of [
+    "Lifestyle / activity",
+    "Living situation",
+    "Time availability",
+    "Children / other pets",
+    "Dog experience",
+    "Size preference",
+    "Age preference",
+    "Special-needs fit",
+  ])
+    await expect(bars.getByText(label)).toBeVisible();
+  await expect(bars.getByText("Doesn't apply")).toBeVisible(); // no kids or pets at home
+  await expect(bars.getByText("No preference")).toBeVisible(); // age preference skipped
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(/fit|look/);
+  await expect(page.getByRole("heading", { name: "Why this could work" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Things to consider" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /I.m Interested/ })).toHaveAttribute("href", /\/interested$/);
+  await expect(page.getByRole("link", { name: "Back to your matches" })).toHaveAttribute(
+    "href",
+    new URL(link).pathname,
+  );
+  for (const [w, hgt] of [
+    [390, 844],
+    [360, 800],
+    [768, 1024],
+    [1440, 900],
+  ] as const) {
+    await page.setViewportSize({ width: w, height: hgt });
+    await shot(page, `detail-${w}`);
+  }
+
+  // Profile from results: score sticker and "I'm Interested" instead of "See if we match".
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole("link", { name: /full profile/ }).click();
+  await expect(page).toHaveURL(/\/profile$/);
+  await expect(page.getByText(/^\d+% match, /)).toHaveCount(1); // the score sticker
+  await expect(page.getByRole("link", { name: /I.m Interested/ })).toHaveAttribute("href", /\/interested$/);
+  await expect(page.getByRole("link", { name: "See if we match" })).toHaveCount(0);
+  await shot(page, "profile-from-results-390");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await shot(page, "profile-from-results-1440");
   expect(violations).toEqual([]);
+
+  // A dog this adopter can't be matched with isn't reachable through the link.
+  for (const path of ["/sample-tofu", "/sample-tofu/profile", "/no-such-dog"])
+    expect((await page.request.get(link + path)).status()).toBe(404);
 
   // Stored once, with a 90-day link and the E.164 number.
   const rowsDb = (await (
@@ -136,7 +188,7 @@ test("questionnaire: 5 steps, progress kept on refresh, 18+, consent, results li
 
 test("results links are private: headers, wrong and malformed tokens", async ({ page, request }) => {
   const wrong = `/r/${randomBytes(32).toString("base64url")}`;
-  for (const path of [wrong, "/r/not-a-token"]) {
+  for (const path of [wrong, "/r/not-a-token", `${wrong}/sample-biscuit`, `${wrong}/sample-biscuit/profile`]) {
     const res = await request.get(path);
     expect(res.status()).toBe(404);
     const hd = res.headers();

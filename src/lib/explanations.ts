@@ -130,9 +130,15 @@ export function explain(m: Pick<Match, "why" | "consider" | "dog">, a: AdopterAn
   };
 }
 
-/** Children/pets is left out of the score when the adopter has none at home: there's nothing to compare. */
-export const appliesTo = (key: Category, a: AdopterAnswers) =>
-  key !== "household" || a.has_children_under_12 || a.has_dogs || a.has_cats;
+/**
+ * Why a category has no score when no data is missing: Children/pets with none at home (nothing to
+ * compare), or a size/age preference the adopter skipped. Null means "Not known yet" applies.
+ */
+export function emptyNote(key: Category, a: AdopterAnswers) {
+  if (key === "household" && !(a.has_children_under_12 || a.has_dogs || a.has_cats)) return "Doesn't apply";
+  if ((key === "size" && !a.pref_sizes.length) || (key === "age" && !a.pref_ages.length)) return "No preference";
+  return null;
+}
 
 /** "3 dogs aren't shown because …" under the results, one line per hard constraint (Results.dc.html). */
 export function excludedLine(key: string, n: number, a: AdopterAnswers) {

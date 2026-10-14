@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CATEGORIES, appliesTo, excludedLine, explain } from "@/lib/explanations";
+import { CATEGORIES, emptyNote, excludedLine, explain } from "@/lib/explanations";
 import type { AdopterAnswers, MatchDog } from "@/lib/server/matches";
 
 const adopter: AdopterAnswers = {
@@ -67,12 +67,14 @@ describe("explain", () => {
   });
 });
 
-describe("appliesTo / excludedLine", () => {
-  it("Children/pets doesn't apply when there are no kids or pets at home", () => {
-    const none = { ...adopter, has_children_under_12: false, has_dogs: false, has_cats: false };
-    expect(appliesTo("household", none)).toBe(false);
-    expect(appliesTo("household", adopter)).toBe(true);
-    expect(appliesTo("size", none)).toBe(true);
+describe("emptyNote / excludedLine", () => {
+  it("names empty bars that aren't missing data", () => {
+    const none = { ...adopter, has_children_under_12: false, has_dogs: false, has_cats: false, pref_ages: [] };
+    expect(emptyNote("household", none)).toBe("Doesn't apply");
+    expect(emptyNote("age", none)).toBe("No preference");
+    expect(emptyNote("household", adopter)).toBeNull();
+    expect(emptyNote("size", adopter)).toBeNull();
+    expect(emptyNote("lifestyle", none)).toBeNull();
   });
 
   it("explains each exclusion in plain words", () => {

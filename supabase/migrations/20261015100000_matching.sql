@@ -212,7 +212,7 @@ $$;
 -- SHA-256 of the token; the token itself is never stored). Eligible dogs, ranked, with the public
 -- fields cards and explanations use, and their first photo; p_slug narrows it to one dog (its full
 -- profile comes from the cached public_dogs read). "adopter" holds answers used for explanations,
--- never contact details.
+-- never contact details; "weights" are the ones this score used (shown beside each bar).
 create function public.results_for_token(p_token_hash bytea, p_slug text default null)
 returns jsonb
 language sql stable security invoker set search_path = '' as $$
@@ -228,6 +228,7 @@ language sql stable security invoker set search_path = '' as $$
       'has_dogs', has_dogs, 'has_cats', has_cats, 'pref_sizes', pref_sizes, 'pref_ages', pref_ages,
       'pref_energy', pref_energy, 'open_to_special_needs', open_to_special_needs,
       'open_to_senior', open_to_senior, 'expires_at', token_expires_at) from ad),
+    'weights', (select jsonb_object_agg(category, weight) from public.match_weights),
     'total', (select count(*) from r),
     'excluded', (select coalesce(jsonb_object_agg(k, n), '{}') from (
       select k, count(*) as n from r cross join unnest(r.excluded_by) k group by k) x),

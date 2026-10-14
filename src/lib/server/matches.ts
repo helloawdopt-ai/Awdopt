@@ -59,6 +59,8 @@ export type Match = {
 
 export type Results = {
   adopter: AdopterAnswers;
+  /** The weights this score used, per category (the bars show each as a share of the total). */
+  weights: Record<Category, number>;
   total: number;
   excluded: Partial<Record<string, number>>;
   matches: Match[];

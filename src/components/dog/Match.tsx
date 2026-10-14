@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { cx } from "@/lib/cx";
+import { NOT_KNOWN } from "@/lib/dog-format";
 import { DogPhoto, type Photo } from "./DogPhoto";
 
 /** Match level from DESIGN.md §3: 85+ Great fit (Mint), 70–84 Good fit (Butter), else Worth a look. */
@@ -100,27 +101,33 @@ type CategoryBarProps = {
   label: string;
   /** e.g. "25%" */
   weight: string;
-  /** 0–100, or null when either side didn't answer (k = 0). */
+  /** 0–100, or null when it couldn't be scored. */
   score: number | null;
+  /** Shown instead of "Not known yet" when nothing is missing: "Doesn't apply", "No preference". */
+  note?: string | null;
 };
 
-/** One of the 8 category bars. Mint at 90+, Butter below. Unknown: dashed track + "Not known yet". */
-export function CategoryBar({ label, weight, score }: CategoryBarProps) {
+/**
+ * One of the 8 category bars. Mint at 90+, Butter below. Unknown: dashed track + "Not known yet".
+ * With a note ("Doesn't apply", "No preference"): plain empty track, because nothing is missing.
+ */
+export function CategoryBar({ label, weight, score, note }: CategoryBarProps) {
+  const unknown = score === null && !note;
   return (
     <div className="flex flex-col gap-[5px]">
-      <div className="flex justify-between text-sm">
+      <div className="flex justify-between gap-3 text-sm">
         <span className="font-bold">
           {label} <span className="font-medium text-muted">· {weight}</span>
         </span>
-        <span className={cx("tabular", score === null ? "font-medium text-muted" : "font-extrabold")}>
-          {score === null ? "Not known yet" : score}
+        <span className={cx("shrink-0 tabular", score === null ? "font-medium text-muted" : "font-extrabold")}>
+          {score ?? note ?? NOT_KNOWN}
         </span>
       </div>
       <div
         aria-hidden="true"
         className={cx(
           "h-2.5 overflow-hidden rounded-[5px] border-[1.5px] border-ink bg-bg",
-          score === null && "border-dashed",
+          unknown && "border-dashed",
         )}
       >
         {score !== null && (

@@ -136,7 +136,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
         </main>
       </div>
       <StickyBar>
-        <ButtonLink href="/match" className="grow">
+        <ButtonLink href="/match/basic" className="grow">
           Get my match scores
         </ButtonLink>
       </StickyBar>
