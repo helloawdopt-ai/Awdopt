@@ -38,8 +38,13 @@ test("nonce is fresh per request and applied to Next.js scripts", async ({ reque
 test("page loads with no CSP violations", async ({ page }) => {
   const violations: string[] = [];
   page.on("console", (m) => /Content Security Policy/i.test(m.text()) && violations.push(m.text()));
-  await page.goto("/brand");
-  await page.getByRole("button", { name: "Open filters" }).click();
+  // Discovery: Supabase Storage images + the filter sheet.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/dogs");
+  await page.getByRole("button", { name: "Filters" }).click();
   await expect(page.getByRole("dialog", { name: "Filters" })).toBeVisible();
+  // Listing step 5: Turnstile's script, iframe and token.
+  await page.goto("/list/details");
+  await expect(page.locator('input[name="cf-turnstile-response"]')).toHaveValue(/.+/, { timeout: 20_000 });
   expect(violations).toEqual([]);
 });

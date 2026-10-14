@@ -1,14 +1,15 @@
 // Lighthouse budgets (mobile, simulated 4G: Lighthouse's default). Run against the Vercel preview:
-//   LHCI_URL=https://<preview>.vercel.app npm run lhci
+//   LH_TARGET=https://<preview>.vercel.app npm run lhci
+// (Not LHCI_*: LHCI turns those env vars into CLI flags, and LHCI_URL would override the URL list.)
 // Previews sit behind Vercel Authentication; the bypass secret comes from .env.local.
-const base = process.env.LHCI_URL ?? "http://localhost:3000";
+const base = process.env.LH_TARGET ?? "http://localhost:3000";
 const bypass = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
 
 module.exports = {
   ci: {
     collect: {
-      // Grows each milestone: /dogs, /dogs/[slug] (M2), /r/[token] (M3).
-      url: ["/"].map((path) => base + path),
+      // Grows each milestone: /r/[token] joins in M3. The profile slug exists in the dev seed.
+      url: ["/", "/dogs", "/dogs/sample-biscuit"].map((path) => base + path),
       numberOfRuns: 3,
       settings: bypass ? { extraHeaders: JSON.stringify({ "x-vercel-protection-bypass": bypass }) } : {},
     },

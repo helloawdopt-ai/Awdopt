@@ -28,7 +28,8 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   await connection();
   return (
     <html lang="en" className={`${unbounded.variable} ${figtree.variable} antialiased`}>
-      <head>{supabaseUrl && <link rel="preconnect" href={new URL(supabaseUrl).origin} crossOrigin="" />}</head>
+      {/* No crossorigin: the only Supabase requests from pages are plain <img> loads (no-CORS). */}
+      <head>{supabaseUrl && <link rel="preconnect" href={new URL(supabaseUrl).origin} />}</head>
       <body>{children}</body>
     </html>
   );

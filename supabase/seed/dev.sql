@@ -18,7 +18,7 @@ insert into public.dogs (
    'Sample Biscuit', 'male', 24, 'Indie', 'medium', 'high', 'Bandra', 'Playful, loves fetch',
    true, true, null, false, 4, 'moderate', false, 'full', true, 'Fake story for testing.', 'fake admin note', now()),
   ('00000000-0000-4000-b000-000000000002', 'sample-pepper', '00000000-0000-4000-a000-000000000001', 'approved', true,
-   'Sample Pepper', 'female', 6, 'Indie', 'small', 'medium', 'Andheri', 'Curious puppy',
+   'Sample Pepper', 'female', 6, 'Indie', 'small', 'medium', 'Andheri West', 'Curious puppy',
    true, true, true, false, 2, 'easy', false, 'partial', false, null, null, now()),
   ('00000000-0000-4000-b000-000000000003', 'sample-tofu', '00000000-0000-4000-a000-000000000002', 'approved', false,
    'Sample Tofu', 'male', 96, 'Labrador Retriever', 'large', 'low', 'Powai', 'Calm senior',
@@ -45,10 +45,18 @@ insert into public.dogs (
    'Sample Samosa', 'male', 72, 'Indie', 'large', 'low', 'Malad', null,
    null, null, null, null, null, null, null, null, null, null, 'removed by admin', null);
 
+-- Files: run `node --env-file=.env.local scripts/seed-dev-photos.mjs` after this seed (generated, clearly fake).
 insert into public.dog_photos (dog_id, position, path_480, path_960, path_1600, width, height) values
   ('00000000-0000-4000-b000-000000000001', 0, 'fake/biscuit-0-480.webp', 'fake/biscuit-0-960.webp', 'fake/biscuit-0-1600.webp', 1600, 1200),
   ('00000000-0000-4000-b000-000000000001', 1, 'fake/biscuit-1-480.webp', 'fake/biscuit-1-960.webp', 'fake/biscuit-1-1600.webp', 1600, 1200),
-  ('00000000-0000-4000-b000-000000000007', 0, 'fake/pickle-0-480.webp', 'fake/pickle-0-960.webp', 'fake/pickle-0-1600.webp', 1600, 1200);
+  ('00000000-0000-4000-b000-000000000001', 2, 'fake/biscuit-2-480.webp', 'fake/biscuit-2-960.webp', 'fake/biscuit-2-1600.webp', 1600, 1200),
+  ('00000000-0000-4000-b000-000000000002', 0, 'fake/pepper-0-480.webp', 'fake/pepper-0-960.webp', 'fake/pepper-0-1600.webp', 1600, 1200),
+  ('00000000-0000-4000-b000-000000000003', 0, 'fake/tofu-0-480.webp', 'fake/tofu-0-960.webp', 'fake/tofu-0-1600.webp', 1600, 1200),
+  ('00000000-0000-4000-b000-000000000003', 1, 'fake/tofu-1-480.webp', 'fake/tofu-1-960.webp', 'fake/tofu-1-1600.webp', 1600, 1200),
+  ('00000000-0000-4000-b000-000000000005', 0, 'fake/rocket-0-480.webp', 'fake/rocket-0-960.webp', 'fake/rocket-0-1600.webp', 1600, 1200),
+  ('00000000-0000-4000-b000-000000000007', 0, 'fake/pickle-0-480.webp', 'fake/pickle-0-960.webp', 'fake/pickle-0-1600.webp', 1600, 1200),
+  ('00000000-0000-4000-b000-000000000007', 1, 'fake/pickle-1-480.webp', 'fake/pickle-1-960.webp', 'fake/pickle-1-1600.webp', 1600, 1200),
+  ('00000000-0000-4000-b000-000000000008', 0, 'fake/chutney-0-480.webp', 'fake/chutney-0-960.webp', 'fake/chutney-0-1600.webp', 1600, 1200);
 
 insert into public.adopters (
   id, name, age, city, phone, email, home_type, household, has_children_under_12, has_dogs, has_cats,

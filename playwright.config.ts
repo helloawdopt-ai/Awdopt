@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import { defineConfig, devices } from "@playwright/test";
 
 const PORT = 3100;
@@ -13,9 +14,17 @@ export default defineConfig({
   webServer: process.env.E2E_BASE_URL
     ? undefined
     : {
-        command: `npm run build && npm run start -- -p ${PORT}`,
+        // Clear the data cache first: tests change dev data behind it (fixtures are deleted directly).
+        command: `rm -rf .next/cache/fetch-cache && npm run build && npm run start -- -p ${PORT}`,
         port: PORT,
         timeout: 240_000,
         reuseExistingServer: true,
+        // Cloudflare's published always-pass Turnstile test keys (not secrets) and a throwaway salt,
+        // so the listing flow runs locally without real keys. Real keys only live in Vercel Production.
+        env: {
+          NEXT_PUBLIC_TURNSTILE_SITE_KEY: "1x00000000000000000000AA",
+          TURNSTILE_SECRET_KEY: "1x0000000000000000000000000000000AA",
+          RATE_LIMIT_IP_SALT: randomBytes(32).toString("hex"),
+        },
       },
 });

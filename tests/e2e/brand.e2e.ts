@@ -1,4 +1,24 @@
-import { expect, test } from "@playwright/test";
+import { expect, test as base, type BrowserContextOptions } from "@playwright/test";
+import { deleteUsers, devReady, makeUser, signInWithMfa } from "./admin-helpers";
+
+// /brand is admin-only (aal2), so every test here runs signed in as a throwaway dev admin.
+base.describe.configure({ mode: "serial" });
+base.skip(!devReady, "needs .env.local (dev)");
+let state: BrowserContextOptions["storageState"];
+base.beforeAll(async ({ browser, baseURL }) => {
+  const ctx = await browser.newContext({ baseURL });
+  await signInWithMfa(await ctx.newPage(), await makeUser({ role: "admin" }));
+  state = await ctx.storageState();
+  await ctx.close();
+});
+base.afterAll(deleteUsers);
+const test = base.extend({
+  page: async ({ browser, baseURL }, provide) => {
+    const ctx = await browser.newContext({ storageState: state, baseURL });
+    await provide(await ctx.newPage());
+    await ctx.close();
+  },
+});
 
 const WIDTHS = [
   [360, 800],
@@ -67,7 +87,8 @@ test("keyboard focus is never hidden under the sticky bar", async ({ page }) => 
   }
 });
 
-test("/brand is hidden from search engines", async ({ request }) => {
-  const res = await request.get("/brand");
+test("/brand is hidden from search engines", async ({ page }) => {
+  const res = await page.request.get("/brand");
+  expect(res.url()).toMatch(/\/brand$/);
   expect(res.headers()["x-robots-tag"]).toBe("noindex");
 });

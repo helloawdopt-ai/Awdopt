@@ -1,64 +1,58 @@
 "use client";
 
-import { Plus, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { LoaderCircle, Plus, X } from "lucide-react";
+import { useRef } from "react";
+import { FieldError } from "./Field";
 
-type Photo = { file: File; url: string };
+type Props = {
+  /** Object URLs of the processed (EXIF-free) previews. */
+  previews: string[];
+  max?: number;
+  onAdd?: (files: File[]) => void;
+  onRemove?: (index: number) => void;
+  busy?: boolean;
+  error?: string;
+};
 
-type Props = { max?: number };
-
-// UI only for now. The resize/WebP/EXIF-strip pipeline and signed uploads arrive with the listing form.
-export function PhotoUploader({ max = 6 }: Props) {
+/** DESIGN.md §7: 3-column grid of 100px slots, × to remove, dashed "+ Add" slot. */
+export function PhotoUploader({ previews, max = 6, onAdd, onRemove, busy, error }: Props) {
   const input = useRef<HTMLInputElement>(null);
-  const [photos, setPhotos] = useState<Photo[]>([]);
-  const live = useRef(photos);
-  useEffect(() => {
-    live.current = photos;
-  }, [photos]);
-  // Revoke any remaining previews on unmount.
-  useEffect(() => () => live.current.forEach((p) => URL.revokeObjectURL(p.url)), []);
-
-  const add = (files: FileList | null) => {
-    if (!files) return;
-    const added = [...files].slice(0, max - photos.length).map((file) => ({ file, url: URL.createObjectURL(file) }));
-    setPhotos([...photos, ...added]);
-    if (input.current) input.current.value = "";
-  };
-
-  const remove = (p: Photo) => {
-    URL.revokeObjectURL(p.url);
-    setPhotos(photos.filter((x) => x !== p));
-  };
 
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-[15px] font-extrabold">
-        Photos <span className="font-medium text-muted">· up to {max}</span>
+      <span id="photos-label" className="text-[15px] font-extrabold">
+        Photos <span className="font-medium text-muted">· 1 to {max}</span>
       </span>
-      <ul className="grid grid-cols-3 gap-2">
-        {photos.map((p, i) => (
-          <li key={p.url} className="relative h-[100px] rounded-[16px] border-[2.5px] border-ink">
+      <ul aria-labelledby="photos-label" className="grid grid-cols-3 gap-2">
+        {previews.map((url, i) => (
+          <li key={url} className="relative h-[100px] rounded-[16px] border-[2.5px] border-ink">
             {/* eslint-disable-next-line @next/next/no-img-element -- local blob preview */}
-            <img src={p.url} alt={`Photo ${i + 1}`} className="size-full rounded-[13px] object-cover" />
+            <img src={url} alt={`Photo ${i + 1}`} className="size-full rounded-[13px] object-cover" />
             <button
               type="button"
               aria-label={`Remove photo ${i + 1}`}
-              onClick={() => remove(p)}
+              onClick={() => onRemove?.(i)}
               className="absolute -top-2.5 -right-2.5 inline-flex size-7 items-center justify-center rounded-full border-2 border-ink bg-surface after:absolute after:-inset-2 hover:bg-highlight"
             >
               <X size={12} strokeWidth={3} aria-hidden="true" />
             </button>
           </li>
         ))}
-        {photos.length < max && (
+        {previews.length < max && (
           <li>
             <button
               type="button"
+              disabled={busy}
+              aria-describedby={error ? "photos-error" : undefined}
               onClick={() => input.current?.click()}
-              className="flex h-[100px] w-full flex-col items-center justify-center gap-1 rounded-[16px] border-[2.5px] border-dashed border-ink bg-surface text-[13px] font-extrabold hover:bg-bg"
+              className="flex h-[100px] w-full flex-col items-center justify-center gap-1 rounded-[16px] border-[2.5px] border-dashed border-ink bg-surface text-[13px] font-extrabold hover:bg-bg disabled:cursor-wait"
             >
-              <Plus size={22} strokeWidth={2.6} aria-hidden="true" />
-              Add
+              {busy ? (
+                <LoaderCircle size={22} strokeWidth={2.6} aria-hidden="true" className="animate-spin" />
+              ) : (
+                <Plus size={22} strokeWidth={2.6} aria-hidden="true" />
+              )}
+              {busy ? "Preparing…" : "Add"}
             </button>
           </li>
         )}
@@ -69,9 +63,15 @@ export function PhotoUploader({ max = 6 }: Props) {
         accept="image/jpeg,image/png,image/webp"
         multiple
         hidden
-        onChange={(e) => add(e.target.files)}
+        onChange={(e) => {
+          onAdd?.([...(e.target.files ?? [])].slice(0, max - previews.length));
+          e.target.value = "";
+        }}
       />
-      <span className="text-xs leading-snug text-muted">We strip location data from photos before upload.</span>
+      <FieldError id="photos-error" error={error} />
+      <span className="text-xs leading-snug text-muted">
+        We strip location data from photos before upload, so your home stays private.
+      </span>
     </div>
   );
 }
