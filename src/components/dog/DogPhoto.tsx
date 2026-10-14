@@ -3,7 +3,7 @@ import { cx } from "@/lib/cx";
 
 export type Photo = { src: string; srcSet?: string; sizes?: string; width: number; height: number; alt: string };
 
-const tints = ["bg-highlight", "bg-bubble", "bg-fresh", "bg-peach"];
+export const tints = ["bg-highlight", "bg-bubble", "bg-fresh", "bg-peach"];
 
 /** Real photo, or a tinted placeholder only while it's missing (DESIGN.md §7). */
 export function DogPhoto({

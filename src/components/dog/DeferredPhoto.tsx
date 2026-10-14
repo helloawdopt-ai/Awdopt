@@ -2,9 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { cx } from "@/lib/cx";
-import type { Photo } from "./DogPhoto";
-
-const tints = ["bg-highlight", "bg-bubble", "bg-fresh", "bg-peach"];
+import { tints, type Photo } from "./DogPhoto";
 
 /**
  * A below-the-fold card photo that starts loading only after the window `load` event, so it never

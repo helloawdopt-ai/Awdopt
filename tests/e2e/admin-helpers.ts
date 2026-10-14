@@ -1,6 +1,9 @@
-import { createHmac, randomBytes } from "node:crypto";
+import { randomBytes } from "node:crypto";
 import { expect, type Page } from "@playwright/test";
 import sharp from "sharp";
+import { totp } from "../totp";
+
+export { totp };
 
 // awdopt-dev only: creates fake listings and auth users through the service API, and removes them.
 export const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
@@ -90,19 +93,6 @@ export async function makeUser(appMetadata: Record<string, unknown>) {
 }
 export async function deleteUsers() {
   await Promise.all(users.splice(0).map((id) => sb(`/auth/v1/admin/users/${id}`, { method: "DELETE" })));
-}
-
-// RFC 6238 TOTP (SHA-1, 6 digits, 30s) from a base32 secret.
-export function totp(base32: string, offset = 0) {
-  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-  let bits = "";
-  for (const c of base32.replace(/=+$/, "").toUpperCase()) bits += alphabet.indexOf(c).toString(2).padStart(5, "0");
-  const k = Buffer.from(bits.match(/.{8}/g)!.map((b) => parseInt(b, 2)));
-  const counter = Buffer.alloc(8);
-  counter.writeBigUInt64BE(BigInt(Math.floor(Date.now() / 30_000) + offset));
-  const hmac = createHmac("sha1", k).update(counter).digest();
-  const o = hmac[hmac.length - 1]! & 0xf;
-  return String((hmac.readUInt32BE(o) & 0x7fffffff) % 1_000_000).padStart(6, "0");
 }
 
 export async function signIn(page: Page, user: { email: string; password: string }) {

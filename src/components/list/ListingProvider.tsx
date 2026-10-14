@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { useForm, type Resolver, type UseFormReturn } from "react-hook-form";
 import { submitListing } from "@/app/list/actions";
 import type { ProcessedPhoto } from "@/lib/images";
@@ -61,8 +61,7 @@ export function ListingProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [turnstileKey, setTurnstileKey] = useState(0);
   const [submitted, setSubmitted] = useState<Ctx["submitted"]>(null);
-  const failed = useRef<Upload[]>([]);
-  const [failedUploads, setFailedUploads] = useState(0);
+  const [failed, setFailed] = useState<Upload[]>([]);
 
   // Text answers survive a refresh (sessionStorage, this tab only). Photos can't; consent never does.
   useEffect(() => {
@@ -141,8 +140,7 @@ export function ListingProvider({ children }: { children: ReactNode }) {
         }),
       );
     }
-    failed.current = failures;
-    setFailedUploads(failures.length);
+    setFailed(failures);
     if (failures.length) {
       setStatus("idle");
       setError("Some photos didn't upload. Check your connection and try again.");
@@ -208,12 +206,12 @@ export function ListingProvider({ children }: { children: ReactNode }) {
     status,
     error,
     progress,
-    failedUploads,
+    failedUploads: failed.length,
     setToken,
     token,
     turnstileKey,
     submit,
-    retryUploads: () => upload(failed.current),
+    retryUploads: () => upload(failed),
     submitted,
   };
   return <ListingContext value={value}>{children}</ListingContext>;

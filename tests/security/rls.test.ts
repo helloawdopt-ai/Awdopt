@@ -1,5 +1,6 @@
-import { createHmac, randomBytes } from "node:crypto";
+import { randomBytes } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { totp } from "../totp";
 
 // RLS / privilege suite against awdopt-dev. Proves that the anon key, a signed-in non-admin
 // and an admin without MFA (aal1) are all denied, and that an aal2 admin is allowed.
@@ -68,19 +69,6 @@ async function makeUser(appMetadata: Record<string, unknown>) {
     body: JSON.stringify({ email, password }),
   });
   return session.access_token as string;
-}
-
-// RFC 6238 TOTP (SHA-1, 6 digits, 30s) from a base32 secret.
-function totp(base32: string) {
-  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-  let bits = "";
-  for (const c of base32.replace(/=+$/, "").toUpperCase()) bits += alphabet.indexOf(c).toString(2).padStart(5, "0");
-  const key = Buffer.from(bits.match(/.{8}/g)!.map((b) => parseInt(b, 2)));
-  const counter = Buffer.alloc(8);
-  counter.writeBigUInt64BE(BigInt(Math.floor(Date.now() / 30_000)));
-  const h = createHmac("sha1", key).update(counter).digest();
-  const o = h[h.length - 1]! & 0xf;
-  return String((h.readUInt32BE(o) & 0x7fffffff) % 1_000_000).padStart(6, "0");
 }
 
 async function upgradeToAal2(token: string) {
