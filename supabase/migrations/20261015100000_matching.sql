@@ -9,7 +9,7 @@
 --   special_needs      dog has medical/special needs and the adopter said no to special needs
 --   alone_time         adopter's hours alone exceed the dog's longest time alone
 --
--- Stage 2, score = 100 · Σ(w·s·k) / Σ(w·k); confidence = Σ(w·k) / Σw.
+-- Stage 2, score = 100 · Σ(w·s·k) / Σ(w·k); confidence = Σ(w·k) / Σw over the categories that apply.
 -- Each category's s (0–1) is the mean of the sub-checks below that both sides answered; k = 0
 -- (s NULL) when none could be answered, so missing data never adds points.
 -- "Step" sub-checks compare positions on an ordered scale: s = 1 − 0.5 · gap, kept within 0..1
@@ -22,7 +22,8 @@
 --   time           1 if hours alone ≤ the dog's limit, else 1 − (hours over) / 4, at least 0
 --                  step (energy − daily time): low needs under 1 hr, medium 1–2 hrs, high 2–4 hrs
 --   household      for each of children / dogs / cats the adopter has: 1 if the dog is good with
---                  them, 0 if not; 1 when the adopter has none of them (nothing to clash with)
+--                  them, 0 if not. Doesn't apply when the adopter has none of them (nothing to
+--                  compare): left out of both the score and the confidence, not counted as unknown
 --   experience     step (handling − experience): easy / some experience / experienced only
 --                  vs first dog / some / experienced
 --   size           step min |size − preferred size|  (k = 0 when no preference)
@@ -131,7 +132,7 @@ language sql stable security invoker set search_path = '' as $$
       case when a.has_children_under_12 then d.good_with_children::int end as hh_children,
       case when a.has_dogs then d.good_with_dogs::int end as hh_dogs,
       case when a.has_cats then d.good_with_cats::int end as hh_cats,
-      case when not (a.has_children_under_12 or a.has_dogs or a.has_cats) then 1 end as hh_none,
+      a.has_children_under_12 or a.has_dogs or a.has_cats as hh_applies,
       case when d.hd is not null then 1 - 0.5 * greatest(d.hd - a.xp, 0) end as exp_handling,
       (select 1 - 0.5 * min(abs(x - d.sz)) from unnest(a.ps) x) as size_pref,
       case when d.band is not null then
@@ -144,14 +145,14 @@ language sql stable security invoker set search_path = '' as $$
   -- Category s = mean of its answered sub-checks; NULL (k = 0) when none were answered.
   c as materialized (
     select
-      id, created_at, excluded_by,
+      id, created_at, excluded_by, hh_applies,
       (coalesce(life_activity, 0) + coalesce(life_pref, 0))::float8
         / nullif(num_nonnulls(life_activity, life_pref), 0) as lifestyle,
       living_space::float8 as living,
       (coalesce(time_alone, 0) + coalesce(time_daily, 0))::float8
         / nullif(num_nonnulls(time_alone, time_daily), 0) as time,
-      (coalesce(hh_children, 0) + coalesce(hh_dogs, 0) + coalesce(hh_cats, 0) + coalesce(hh_none, 0))::float8
-        / nullif(num_nonnulls(hh_children, hh_dogs, hh_cats, hh_none), 0) as household,
+      (coalesce(hh_children, 0) + coalesce(hh_dogs, 0) + coalesce(hh_cats, 0))::float8
+        / nullif(num_nonnulls(hh_children, hh_dogs, hh_cats), 0) as household,
       exp_handling::float8 as experience,
       size_pref::float8 as size,
       age_pref::float8 as age,
@@ -171,7 +172,7 @@ language sql stable security invoker set search_path = '' as $$
         + w.time * (c.time is not null)::int + w.household * (c.household is not null)::int
         + w.experience * (c.experience is not null)::int + w.size * (c.size is not null)::int
         + w.age * (c.age is not null)::int + w.special_needs * (c.special_needs is not null)::int as den,
-      w.total
+      w.total - case when c.hh_applies then 0 else w.household end as total
     from c cross join w
   )
   select
@@ -180,7 +181,7 @@ language sql stable security invoker set search_path = '' as $$
       order by r.eligible desc, coalesce(100 * r.num / nullif(r.den, 0), 0) desc, r.den desc, r.created_at, r.id
     ))::integer end,
     case when r.eligible then round(coalesce(100 * r.num / nullif(r.den, 0), 0)::numeric, 2) end,
-    round((r.den / r.total)::numeric, 3),
+    round(coalesce(r.den / nullif(r.total, 0), 0)::numeric, 3),
     jsonb_build_object(
       'lifestyle', round(r.lifestyle::numeric, 4), 'living', round(r.living::numeric, 4),
       'time', round(r.time::numeric, 4), 'household', round(r.household::numeric, 4),

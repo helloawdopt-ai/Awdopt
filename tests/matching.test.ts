@@ -5,6 +5,8 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 // expected value worked out by hand from the formulas in supabase/migrations/*_matching.sql.
 // Weights L 25 · Lv 20 · T 15 · H 10 · E 10 · S 10 · A 5 · SN 5. Positions: energy/size/handling/
 // experience 0–2, age band 0–3 (puppy, young, adult, senior), home space 0–2. step(gap) = 1 − 0.5·gap.
+// Children/pets doesn't apply to adopters with no kids, dogs or cats (A2, A4): it leaves the score
+// and the confidence total (Σw = 90), rather than counting as unknown.
 const DEV_HOST = "bdrkuwznuuklrryxddba.supabase.co";
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 const secret = process.env.SUPABASE_SECRET_KEY ?? "";
@@ -107,18 +109,17 @@ const EXPECTED: Record<number, { ranked: [number, number, number][]; excluded: R
   },
   2: {
     ranked: [
-      // D10: Lv (1 − 2 → 1) 20 + H (no kids/pets → 1) 10 → 30/30 = 100 on 0.30
-      [10, 100, 0.3],
-      // D2: only H answered (adopter has no kids/pets) → 10/10 = 100 on 0.10
-      [2, 100, 0.1],
-      // D1: L .5 · Lv 1 · T 1 · H 1 · E 1 · SN 1, no size/age preference → 72.5/85 = 85.29
-      [1, 85.29, 0.85],
-      // D5: same as D1 (needs space, has a garden) → 85.29, listed after D1
-      [5, 85.29, 0.85],
-      // D3: L |2−0| 0 · Lv 1 · T 1 · H 1 · E 1 · SN 1 → 60/85 = 70.59
-      [3, 70.59, 0.85],
-      // D6: as D3, SN (medical + senior, open to both) 1 → 70.59, listed after D3
-      [6, 70.59, 0.85],
+      // D10: only Lv (1 − 2 → 1) answered → 20/20 = 100 on 20/90 = 0.222
+      [10, 100, 0.222],
+      // D1: L .5 · Lv 1 · T 1 · E 1 · SN 1, no size/age preference → 62.5/75 = 83.33 on 75/90
+      [1, 83.33, 0.833],
+      // D5: same as D1 (needs space, has a garden) → 83.33, listed after D1
+      [5, 83.33, 0.833],
+      // D3: L |2−0| 0 · Lv 1 · T 1 · E 1 · SN 1 → 50/75 = 66.67
+      [3, 66.67, 0.833],
+      // D6: as D3, SN (medical + senior, open to both) 1 → 66.67, listed after D3
+      [6, 66.67, 0.833],
+      [2, 0, 0], // nothing known
     ],
     excluded: { 4: ["alone_time"], 7: ["alone_time"], 8: ["alone_time"], 9: ["alone_time"] },
   },
@@ -147,15 +148,14 @@ const EXPECTED: Record<number, { ranked: [number, number, number][]; excluded: R
   },
   4: {
     ranked: [
-      // D2: only H (no kids/pets) answered → 100 on 0.10
-      [2, 100, 0.1],
-      // D3: L (|1−0| .5, pref low 1) .75 · Lv 1 · T 1 · H 1 · E 1 · A adult vs senior .5 · SN 1, no size pref
-      // → 18.75+20+15+10+10+2.5+5 = 81.25/90 = 90.28
-      [3, 90.28, 0.9],
-      // D1: L 1 · Lv 1−0 → .5 · T 1 · H 1 · E 1 · A young vs senior 0 · SN 1 → 75/90 = 83.33
-      [1, 83.33, 0.9],
-      // D10: Lv .5 · H 1 · A 0 → 20/35 = 57.14
-      [10, 57.14, 0.35],
+      // D3: L (|1−0| .5, pref low 1) .75 · Lv 1 · T 1 · E 1 · A adult vs senior .5 · SN 1, no size pref
+      // → 18.75+20+15+10+2.5+5 = 71.25/80 = 89.06 on 80/90
+      [3, 89.06, 0.889],
+      // D1: L 1 · Lv 1−0 → .5 · T 1 · E 1 · A young vs senior 0 · SN 1 → 65/80 = 81.25
+      [1, 81.25, 0.889],
+      // D10: Lv .5 · A 0 → 10/25 = 40 on 25/90
+      [10, 40, 0.278],
+      [2, 0, 0],
     ],
     excluded: {
       4: ["alone_time"],
@@ -284,6 +284,13 @@ describe("score_dogs_for_adopter", () => {
     expect([d2.score, d2.confidence]).toEqual([0, 0]);
   });
 
+  it("leaves Children/pets out of score and confidence when the adopter has no kids or pets", async () => {
+    const d1 = (await score(2)).find((r) => dogNo(r.dog_id) === 1)!;
+    expect(d1.categories.household).toBeNull();
+    // Answered: L, Lv, T, E, SN = 75 of the 90 that apply (no size/age preference), not of 100.
+    expect([d1.score, d1.confidence]).toEqual([83.33, 0.833]);
+  });
+
   it("renormalises over answered categories and reports the confidence", async () => {
     const d10 = (await score(1)).find((r) => dogNo(r.dog_id) === 10)!;
     expect(d10.categories).toEqual({
@@ -322,7 +329,7 @@ describe("score_dogs_for_adopter", () => {
     ]);
     const a4 = await score(4);
     expect(pick(a4, 1)).toEqual([
-      ["lifestyle", "time", "household"],
+      ["lifestyle", "time", "experience"],
       ["age", "living"],
     ]);
   });
@@ -397,7 +404,7 @@ describe("results_for_token", () => {
 
   it("narrows to one dog by slug, and not to an excluded one", async () => {
     const one = (await results(hash(tokens[4]!), "fixture-match-3"))!;
-    expect(one.matches.map((m) => [m.dog.slug, m.score])).toEqual([["fixture-match-3", 90.28]]);
+    expect(one.matches.map((m) => [m.dog.slug, m.score])).toEqual([["fixture-match-3", 89.06]]);
     expect((await results(hash(tokens[4]!), "fixture-match-5"))!.matches).toEqual([]);
   });
 
