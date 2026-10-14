@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { StatusChip } from "@/components/ui/Chip";
+import { DeferredPhoto } from "./DeferredPhoto";
 import { DogPhoto, type Photo } from "./DogPhoto";
 
 type Props = {
@@ -14,18 +15,24 @@ type Props = {
   urgent?: boolean;
   photo?: Photo | null;
   priority?: boolean;
+  /** Load the photo only after the page has loaded (below-the-fold cards). */
+  defer?: boolean;
   tint?: number;
 };
 
 /** Discovery card: one link, 210px photo, Plum divider, name + locality, meta, one-line summary. */
-export function DogCard({ href, name, locality, meta, summary, energy, urgent, photo, priority, tint }: Props) {
+export function DogCard({ href, name, locality, meta, summary, energy, urgent, photo, priority, defer, tint }: Props) {
   return (
     <Link
       href={href}
       className="press flex flex-col overflow-hidden rounded-[24px] border-[2.5px] border-ink bg-surface text-ink no-underline shadow-sticker-lg hover:-translate-px hover:shadow-sticker-6 active:translate-[2px] active:shadow-sticker-sm"
     >
       <div className="relative h-[210px] border-b-[2.5px] border-ink">
-        <DogPhoto photo={photo} name={name} tint={tint} priority={priority} className="size-full" />
+        {defer && photo ? (
+          <DeferredPhoto photo={photo} tint={tint} className="size-full" />
+        ) : (
+          <DogPhoto photo={photo} name={name} tint={tint} priority={priority} className="size-full" />
+        )}
         {urgent && (
           <span className="absolute top-3 left-3">
             <StatusChip tone="bubble">Urgent</StatusChip>

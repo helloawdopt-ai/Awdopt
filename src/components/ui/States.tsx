@@ -1,6 +1,5 @@
 import { CircleAlert } from "lucide-react";
 import type { ReactNode } from "react";
-import { cx } from "@/lib/cx";
 
 /** DESIGN.md §16: White panel, Display S heading, one line, one secondary action. No sparkles. */
 export function EmptyState({ title, children, action }: { title: string; children: ReactNode; action?: ReactNode }) {

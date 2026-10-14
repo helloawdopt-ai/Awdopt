@@ -3,7 +3,8 @@ import { preloadPhoto, toPhoto } from "@/lib/photo-url";
 import type { DogCardData } from "@/lib/server/dogs";
 import { DogCard } from "./DogCard";
 
-const SIZES = "(min-width: 1280px) 290px, (min-width: 768px) 45vw, 100vw";
+// Phones get the 480px file (up to ~1.8x density) for a lighter LCP on the 210px-tall card.
+const SIZES = "(min-width: 1280px) 290px, (min-width: 768px) 45vw, 270px";
 
 /** Discovery grid items. `start` keeps tints stable across "Load more" pages. */
 export function DogCards({ dogs, start = 0 }: { dogs: DogCardData[]; start?: number }) {
@@ -23,6 +24,7 @@ export function DogCards({ dogs, start = 0 }: { dogs: DogCardData[]; start?: num
         urgent={d.urgent}
         photo={photos[i]}
         priority={i === lcp}
+        defer={start === 0 && i >= 2}
         tint={start + i}
       />
     </li>
