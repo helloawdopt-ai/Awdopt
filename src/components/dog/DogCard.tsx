@@ -25,6 +25,9 @@ export function DogCard({ href, name, locality, meta, summary, energy, urgent, p
   return (
     <Link
       href={href}
+      // Profiles are dynamic with no loading boundary, so a prefetch fetches next to nothing;
+      // it only adds requests next to the LCP photo. CTAs keep the default prefetch.
+      prefetch={false}
       className="press flex flex-col overflow-hidden rounded-[24px] border-[2.5px] border-ink bg-surface text-ink no-underline shadow-sticker-lg hover:-translate-px hover:shadow-sticker-6 active:translate-[2px] active:shadow-sticker-sm"
     >
       <div className="relative h-[210px] border-b-[2.5px] border-ink">

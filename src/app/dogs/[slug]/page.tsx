@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { ArrowUpRight, ChevronLeft, Lock } from "lucide-react";
+import { DeferredPhoto } from "@/components/dog/DeferredPhoto";
 import { DogPhoto } from "@/components/dog/DogPhoto";
 import { ButtonLink, IconButton } from "@/components/ui/Button";
 import { overline } from "@/components/ui/Chip";
@@ -28,6 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+const PHOTO_BOX = "size-full lg:aspect-[4/3] lg:rounded-[24px] lg:border-[2.5px] lg:border-ink";
 const yesNo = (v: boolean | null) => (v === null ? null : v ? "Yes" : "No");
 
 /** A known value, or the dashed "Not known yet" box (DESIGN.md §7). */
@@ -94,12 +96,21 @@ export default async function Page({ params }: Props) {
             >
               {photos.map((p, i) => (
                 <li key={p.position} className="relative h-[340px] w-full shrink-0 snap-start lg:h-auto">
-                  <DogPhoto
-                    photo={toPhoto(p, `Photo ${i + 1} of ${dog.name}`, SIZES)}
-                    name={dog.name}
-                    priority={i === 0}
-                    className="size-full lg:aspect-[4/3] lg:rounded-[24px] lg:border-[2.5px] lg:border-ink"
-                  />
+                  {/* Only the first photo competes with the page load; the rest wait for window.load. */}
+                  {i === 0 ? (
+                    <DogPhoto
+                      photo={toPhoto(p, `Photo 1 of ${dog.name}`, SIZES)}
+                      name={dog.name}
+                      priority
+                      className={PHOTO_BOX}
+                    />
+                  ) : (
+                    <DeferredPhoto
+                      photo={toPhoto(p, `Photo ${i + 1} of ${dog.name}`, SIZES)}
+                      tint={i}
+                      className={PHOTO_BOX}
+                    />
+                  )}
                   {photos.length > 1 && (
                     <span className="absolute top-6 right-4 rounded-full border-2 border-ink bg-surface px-2.5 py-1 text-[13px] font-extrabold lg:hidden">
                       {i + 1} / {photos.length}
