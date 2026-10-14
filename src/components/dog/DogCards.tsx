@@ -1,12 +1,16 @@
 import { ENERGY_LABEL, dogMeta } from "@/lib/dog-format";
-import { toPhoto } from "@/lib/photo-url";
+import { preloadPhoto, toPhoto } from "@/lib/photo-url";
 import type { DogCardData } from "@/lib/server/dogs";
 import { DogCard } from "./DogCard";
 
 const SIZES = "(min-width: 1280px) 290px, (min-width: 768px) 45vw, 100vw";
 
-/** Discovery grid items. `start` keeps tints and the single high-priority image stable across pages. */
+/** Discovery grid items. `start` keeps tints stable across "Load more" pages. */
 export function DogCards({ dogs, start = 0 }: { dogs: DogCardData[]; start?: number }) {
+  const photos = dogs.map((d) => (d.photos[0] ? toPhoto(d.photos[0], `Photo of ${d.name}`, SIZES) : null));
+  // The LCP is the first card that has a photo; only the first page gets a high-priority image.
+  const lcp = start === 0 ? photos.findIndex(Boolean) : -1;
+  if (lcp >= 0) preloadPhoto(photos[lcp]!);
   return dogs.map((d, i) => (
     <li key={d.id} className="[contain-intrinsic-size:auto_380px] [content-visibility:auto]">
       <DogCard
@@ -17,8 +21,8 @@ export function DogCards({ dogs, start = 0 }: { dogs: DogCardData[]; start?: num
         summary={d.temperament}
         energy={d.energy && ENERGY_LABEL[d.energy]}
         urgent={d.urgent}
-        photo={d.photos[0] ? toPhoto(d.photos[0], `Photo of ${d.name}`, SIZES) : null}
-        priority={start + i === 0}
+        photo={photos[i]}
+        priority={i === lcp}
         tint={start + i}
       />
     </li>

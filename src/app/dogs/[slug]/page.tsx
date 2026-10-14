@@ -8,7 +8,7 @@ import { overline } from "@/components/ui/Chip";
 import { StickyBar } from "@/components/ui/StickyBar";
 import { cx } from "@/lib/cx";
 import { ENERGY_LABEL, HANDLING_LABEL, NOT_KNOWN, VACCINATION_LABEL, ageLabel, dogMeta } from "@/lib/dog-format";
-import { toPhoto } from "@/lib/photo-url";
+import { preloadPhoto, toPhoto } from "@/lib/photo-url";
 import { getDog } from "@/lib/server/dogs";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -59,6 +59,8 @@ export default async function Page({ params }: Props) {
   const dog = await load(params);
   if (!dog) notFound();
 
+  const SIZES = "(min-width: 1024px) 580px, 100vw";
+  if (dog.photos[0]) preloadPhoto(toPhoto(dog.photos[0], "", SIZES));
   const pronoun = dog.sex === "male" ? "His" : dog.sex === "female" ? "Her" : "The";
   const photos = dog.photos;
   const health =
@@ -93,7 +95,7 @@ export default async function Page({ params }: Props) {
               {photos.map((p, i) => (
                 <li key={p.position} className="relative h-[340px] w-full shrink-0 snap-start lg:h-auto">
                   <DogPhoto
-                    photo={toPhoto(p, `Photo ${i + 1} of ${dog.name}`, "(min-width: 1024px) 580px, 100vw")}
+                    photo={toPhoto(p, `Photo ${i + 1} of ${dog.name}`, SIZES)}
                     name={dog.name}
                     priority={i === 0}
                     className="size-full lg:aspect-[4/3] lg:rounded-[24px] lg:border-[2.5px] lg:border-ink"

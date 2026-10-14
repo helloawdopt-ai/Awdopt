@@ -1,3 +1,4 @@
+import { preload } from "react-dom";
 import type { Photo } from "@/components/dog/DogPhoto";
 
 export type PhotoRow = { position: number; w480: string; w960: string; w1600: string; width: number; height: number };
@@ -14,4 +15,9 @@ export function toPhoto(p: PhotoRow, alt: string, sizes: string): Photo {
     height: p.height,
     alt,
   };
+}
+
+/** The page's LCP photo: preloaded in <head> at high priority, so it starts right after the HTML. */
+export function preloadPhoto(photo: Photo) {
+  preload(photo.src, { as: "image", imageSrcSet: photo.srcSet, imageSizes: photo.sizes, fetchPriority: "high" });
 }

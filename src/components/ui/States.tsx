@@ -2,13 +2,6 @@ import { CircleAlert } from "lucide-react";
 import type { ReactNode } from "react";
 import { cx } from "@/lib/cx";
 
-/** DESIGN.md §16: Oat Milk block, 2px dashed Plum at 20%, exact final size, no shimmer. */
-export function Skeleton({ className }: { className?: string }) {
-  return (
-    <div aria-hidden="true" className={cx("rounded-[24px] border-2 border-dashed border-ink/20 bg-bg", className)} />
-  );
-}
-
 /** DESIGN.md §16: White panel, Display S heading, one line, one secondary action. No sparkles. */
 export function EmptyState({ title, children, action }: { title: string; children: ReactNode; action?: ReactNode }) {
   return (
