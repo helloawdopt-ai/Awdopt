@@ -131,27 +131,34 @@ export function CategoryBar({ label, weight, score }: CategoryBarProps) {
   );
 }
 
+/** 22px circle icon: a Mint tick ("why") or a Butter "i" ("consider"). */
+export function ReasonIcon({ kind }: { kind: "why" | "consider" }) {
+  return (
+    <svg viewBox="0 0 24 24" width={22} height={22} className="shrink-0" aria-hidden="true">
+      <circle
+        cx="12"
+        cy="12"
+        r="10"
+        className={cx(kind === "why" ? "fill-fresh" : "fill-highlight", "stroke-ink")}
+        strokeWidth={2}
+      />
+      <path
+        d={kind === "why" ? "M7.5 12.5l3 3 6-6.5" : "M12 11v5M12 8h.01"}
+        fill="none"
+        className="stroke-ink"
+        strokeWidth={2.4}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 /** Reason line: Mint tick for "Why this could work", Butter "i" for "Things to consider". */
 export function ReasonLine({ kind, children }: { kind: "why" | "consider"; children: ReactNode }) {
   return (
     <li className="flex gap-2.5 text-[15px] leading-[1.45]">
-      <svg viewBox="0 0 24 24" width={22} height={22} className="shrink-0" aria-hidden="true">
-        <circle
-          cx="12"
-          cy="12"
-          r="10"
-          className={cx(kind === "why" ? "fill-fresh" : "fill-highlight", "stroke-ink")}
-          strokeWidth={2}
-        />
-        <path
-          d={kind === "why" ? "M7.5 12.5l3 3 6-6.5" : "M12 11v5M12 8h.01"}
-          fill="none"
-          className="stroke-ink"
-          strokeWidth={2.4}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+      <ReasonIcon kind={kind} />
       <span>{children}</span>
     </li>
   );

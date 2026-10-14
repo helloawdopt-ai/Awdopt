@@ -484,7 +484,12 @@ export type Database = {
           why: string[]
         }[]
       }
+      submit_enquiry: { Args: { p: Json; p_token_hash: string }; Returns: string }
       submit_listing: { Args: { p: Json }; Returns: Json }
+      submit_questionnaire: {
+        Args: { p: Json; p_token_hash: string }
+        Returns: string
+      }
     }
     Enums: {
       adoption_timeline:

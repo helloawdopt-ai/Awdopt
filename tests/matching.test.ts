@@ -251,7 +251,11 @@ beforeAll(async () => {
   });
 }, 30_000);
 
+const QUIZ_PHONE = "+910000000066"; // adopters created through submit_questionnaire below
+
 afterAll(async () => {
+  // Enquiries go with their adopter (on delete cascade).
+  await rest(`adopters?phone=eq.${encodeURIComponent(QUIZ_PHONE)}`, { method: "DELETE" });
   await rest(`adopters?id=in.(${Object.keys(ADOPTERS).map((n) => adopterId(Number(n)))})`, { method: "DELETE" });
   await rest(`dogs?lister_id=eq.${LISTER}`, { method: "DELETE" });
   await rest(`listers?id=eq.${LISTER}`, { method: "DELETE" });
@@ -397,7 +401,11 @@ describe("results_for_token", () => {
     );
     expect(r.excluded.alone_time).toBeGreaterThanOrEqual(4);
     expect(Object.keys(fixtures[0]!.dog).sort()).toEqual(
-      ["age_months", "breed", "energy", "locality", "name", "photo", "sex", "size", "slug", "urgent"].sort(),
+      [
+        ...["age_months", "breed", "energy", "locality", "name", "photo", "sex", "size", "slug", "urgent"],
+        ...["good_with_children", "good_with_dogs", "good_with_cats", "needs_large_space", "alone_max_hours"],
+        ...["handling", "medical_needs"],
+      ].sort(),
     );
     for (const key of ["name", "phone", "email", "age", "city"]) expect(r.adopter).not.toHaveProperty(key);
   });
@@ -415,5 +423,84 @@ describe("results_for_token", () => {
       body: JSON.stringify({ token_expires_at: new Date(Date.now() - 1000).toISOString() }),
     });
     expect(await results(hash(tokens[5]!))).toBeNull();
+  });
+});
+
+describe("submit_questionnaire and submit_enquiry", () => {
+  const rpc = <T>(fn: string, args: object) => rest<T>(`rpc/${fn}`, { method: "POST", body: JSON.stringify(args) });
+  const answers = {
+    ...ADOPTERS[1],
+    name: "Fixture Quiz Adopter",
+    age: 30,
+    city: "Mumbai",
+    phone: QUIZ_PHONE,
+    email: null,
+    pref_sizes: ["small", "small", "medium"],
+    pref_breed: "any",
+    adopt_reason: null,
+    timeline: "asap",
+  };
+
+  it("stores answers under the token's hash for 90 days, and scores like the same answers do", async () => {
+    const token = randomBytes(32).toString("base64url");
+    const id = await rpc<string>("submit_questionnaire", { p: answers, p_token_hash: hash(token) });
+    const [row] = await rest<{ pref_sizes: string[]; token_expires_at: string; results_token_hash: string }[]>(
+      `adopters?id=eq.${id}&select=pref_sizes,token_expires_at,results_token_hash`,
+    );
+    expect(row!.pref_sizes).toEqual(["medium", "small"]); // duplicates dropped
+    expect(row!.results_token_hash).toBe(hash(token));
+    const days = (Date.parse(row!.token_expires_at) - Date.now()) / 86_400_000;
+    expect(days).toBeGreaterThan(89.9);
+    expect(days).toBeLessThanOrEqual(90);
+    const r = (await rest<{ matches: { dog: { slug: string }; score: number }[] }>("rpc/results_for_token", {
+      method: "POST",
+      body: JSON.stringify({ p_token_hash: hash(token) }),
+    }))!;
+    const fixtures = r.matches.filter((m) => m.dog.slug.startsWith("fixture-match-"));
+    expect(fixtures.map((m) => [Number(m.dog.slug.split("-").at(-1)), m.score])).toEqual(
+      EXPECTED[1]!.ranked.map(([n, score]) => [n, score]),
+    );
+  });
+
+  it("rejects an adopter under 18 and an unknown option", async () => {
+    const hash32 = hash(randomBytes(32).toString("base64url"));
+    await expect(rpc("submit_questionnaire", { p: { ...answers, age: 17 }, p_token_hash: hash32 })).rejects.toThrow();
+    await expect(
+      rpc("submit_questionnaire", { p: { ...answers, home_type: "castle" }, p_token_hash: hash32 }),
+    ).rejects.toThrow();
+  });
+
+  it("stores an enquiry with a score snapshot, once per phone per dog while it is open", async () => {
+    const enquiry = {
+      dog_slug: "fixture-match-1",
+      name: "Fixture Enquirer",
+      phone: QUIZ_PHONE,
+      email: null,
+      message: null,
+    };
+    const send = (p: object, token = tokens[1]!) => rpc<string>("submit_enquiry", { p, p_token_hash: hash(token) });
+    expect(await send(enquiry)).toBe("sent");
+    expect(await send(enquiry)).toBe("duplicate");
+
+    const [row] = await rest<
+      { id: string; score: number; confidence: number; category_scores: object; weights: Record<string, number> }[]
+    >(`enquiries?adopter_id=eq.${adopterId(1)}&select=id,score,confidence,category_scores,weights`);
+    expect([row!.score, row!.confidence]).toEqual([100, 1]); // A1 × D1, hand-computed above
+    expect(Object.keys(row!.category_scores)).toHaveLength(8);
+    expect(row!.weights).toMatchObject({ lifestyle: 25, living: 20, age: 5 });
+
+    // A closed enquiry no longer blocks a new one.
+    await rest(`enquiries?id=eq.${row!.id}`, { method: "PATCH", body: JSON.stringify({ status: "rejected" }) });
+    expect(await send(enquiry)).toBe("sent");
+  });
+
+  it("refuses dogs that are excluded or not listed, and wrong or expired links", async () => {
+    const base = { name: "Fixture Enquirer", phone: QUIZ_PHONE, email: null, message: null };
+    const send = (slug: string, token: string) =>
+      rpc<string>("submit_enquiry", { p: { ...base, dog_slug: slug }, p_token_hash: hash(token) });
+    expect(await send("fixture-match-3", tokens[1]!)).toBe("unavailable"); // A1 has kids; D3 isn't safe with them
+    expect(await send("no-such-dog", tokens[1]!)).toBe("unavailable");
+    expect(await send("fixture-match-1", randomBytes(32).toString("base64url"))).toBe("expired");
+    expect(await send("fixture-match-1", tokens[5]!)).toBe("expired"); // expired in the test above
   });
 });

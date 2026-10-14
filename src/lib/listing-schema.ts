@@ -1,4 +1,5 @@
 import * as z from "zod/mini";
+import { emailField, nameField, phoneField } from "@/lib/contact-schema";
 import { BREEDS, LOCALITIES } from "@/lib/dog-format";
 export * from "@/lib/listing";
 
@@ -18,17 +19,9 @@ export const VIDEO_URL = /^https:\/\/(www\.|m\.)?(youtube\.com|youtu\.be|drive\.
 
 export const listingSchema = z.object({
   // Step 1: you (never shown publicly)
-  lister_name: z
-    .string()
-    .check(z.trim(), z.minLength(1, "Enter your name"), z.maxLength(80, "Use 80 characters or fewer")),
-  lister_phone: z
-    .string()
-    .check(z.trim(), z.regex(/^\+?[\d\s()-]{8,20}$/, "Enter a phone number, for example 98200 12345")),
-  lister_email: z.string().check(
-    z.trim(),
-    z.maxLength(254, "Use 254 characters or fewer"),
-    z.refine((v) => v === "" || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v), "Enter an email like name@example.com"),
-  ),
+  lister_name: nameField,
+  lister_phone: phoneField,
+  lister_email: emailField,
   relationship: z.enum(["owner", "rescuer", "foster", "shelter_ngo", "helper"], "Choose one"),
   // Step 2: the dog
   name: z

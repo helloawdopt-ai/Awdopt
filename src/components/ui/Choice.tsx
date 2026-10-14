@@ -47,12 +47,12 @@ export function SegmentedControl({ legend, name, options, defaultValue, inputPro
 type OptionGridProps = {
   legend: string;
   name: string;
-  options: { value: string; label: string; hint: string }[];
+  options: { value: string; label: string; hint?: string }[];
   defaultValue?: string;
   inputProps?: InputProps;
 };
 
-/** Option cards (questionnaire): a 2×2 grid, bold label + one-line hint. Never auto-advances. */
+/** Option cards (questionnaire): a 2×2 grid, bold label + optional one-line hint. Never auto-advances. */
 export function OptionGrid({ legend, name, options, defaultValue, inputProps }: OptionGridProps) {
   return (
     <fieldset className="flex flex-col gap-2">
@@ -76,7 +76,7 @@ export function OptionGrid({ legend, name, options, defaultValue, inputProps }: 
               {...inputProps}
             />
             <span className="text-[15px] font-extrabold">{o.label}</span>
-            <span className="text-[13px] leading-snug">{o.hint}</span>
+            {o.hint && <span className="text-[13px] leading-snug">{o.hint}</span>}
           </label>
         ))}
       </div>

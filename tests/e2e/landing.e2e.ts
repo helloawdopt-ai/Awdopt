@@ -40,8 +40,8 @@ test("menu: opens, Esc closes and focus returns to the button", async ({ page })
   await expect(button).toBeFocused();
 });
 
-test("placeholder pages are not indexed", async ({ page }) => {
-  for (const path of ["/match", "/list/dog", "/list/submitted"]) {
+test("later form steps and the confirmation page are not indexed", async ({ page }) => {
+  for (const path of ["/match/home", "/list/dog", "/list/submitted"]) {
     await page.goto(path);
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
   }

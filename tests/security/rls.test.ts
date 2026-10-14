@@ -205,6 +205,11 @@ describe.each([0, 1, 2])("denied caller #%i", (i) => {
     expect((await rest("rpc/results_for_token", { method: "POST", headers: h, body: JSON.stringify(link) })).ok).toBe(
       false,
     );
+    // Bad input would also fail, so check it's the permission (401 anon / 403 signed in) that stops it.
+    for (const fn of ["submit_questionnaire", "submit_enquiry"]) {
+      const body = JSON.stringify({ p: {}, ...link });
+      expect([401, 403], fn).toContain((await rest(`rpc/${fn}`, { method: "POST", headers: h, body })).status);
+    }
   });
 
   it("cannot list, read or write photo storage", async () => {

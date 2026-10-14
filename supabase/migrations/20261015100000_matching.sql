@@ -209,9 +209,10 @@ language sql stable security invoker set search_path = '' as $$
 $$;
 
 -- Page data for a private results link. NULL for a wrong or expired token (the caller passes the
--- SHA-256 of the token; the token itself is never stored). Eligible dogs, ranked, with public card
--- fields and their first photo; p_slug narrows it to one dog (its full profile comes from the
--- cached public_dogs read). "adopter" holds answers used for explanations, never contact details.
+-- SHA-256 of the token; the token itself is never stored). Eligible dogs, ranked, with the public
+-- fields cards and explanations use, and their first photo; p_slug narrows it to one dog (its full
+-- profile comes from the cached public_dogs read). "adopter" holds answers used for explanations,
+-- never contact details.
 create function public.results_for_token(p_token_hash bytea, p_slug text default null)
 returns jsonb
 language sql stable security invoker set search_path = '' as $$
@@ -236,6 +237,9 @@ language sql stable security invoker set search_path = '' as $$
         'dog', jsonb_build_object(
           'slug', d.slug, 'name', d.name, 'urgent', d.urgent, 'sex', d.sex, 'age_months', d.age_months,
           'breed', d.breed, 'size', d.size, 'energy', d.energy, 'locality', d.locality,
+          'good_with_children', d.good_with_children, 'good_with_dogs', d.good_with_dogs,
+          'good_with_cats', d.good_with_cats, 'needs_large_space', d.needs_large_space,
+          'alone_max_hours', d.alone_max_hours, 'handling', d.handling, 'medical_needs', d.medical_needs,
           'photo', (select jsonb_build_object('position', p.position, 'w480', p.path_480,
                       'w960', p.path_960, 'w1600', p.path_1600, 'width', p.width, 'height', p.height)
                     from public.dog_photos p where p.dog_id = d.id and p.position = 0))
