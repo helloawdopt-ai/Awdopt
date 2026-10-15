@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { approveDog, rejectDog } from "@/app/admin/dog-actions";
+import { approveDog, markAdopted, rejectDog, removeDog } from "@/app/admin/dog-actions";
 import { adminButton } from "@/components/ui/AdminTable";
+import { StatusChip } from "@/components/ui/Chip";
 import { ErrorState } from "@/components/ui/States";
-import { RELATIONSHIP_LABEL, dogTitle, submittedLabel } from "@/lib/admin-format";
+import { DOG_STATUS, RELATIONSHIP_LABEL, dogTitle, submittedLabel } from "@/lib/admin-format";
 import {
   ENERGY_LABEL,
   HANDLING_LABEL,
@@ -16,13 +17,20 @@ import {
 } from "@/lib/dog-format";
 import { requireAdmin } from "@/lib/server/auth";
 
-export const metadata: Metadata = { title: "Review listing", robots: { index: false } };
+export const metadata: Metadata = { title: "Dog", robots: { index: false } };
 
 const ERRORS = {
   photos:
     "Some photo files are missing or aren't real images, so this listing can't go live. Reject it, or ask the lister to send it again.",
-  failed: "Something went wrong. Nothing was published. Please try again.",
+  failed: "Something went wrong and nothing changed. Please try again.",
 };
+const NOTICES = {
+  saved: "Changes saved. Find a Dog shows them now.",
+  adopted: "Marked as adopted. The dog is no longer on Find a Dog or in anyone's results.",
+  removed: "Listing removed and its photos deleted.",
+};
+// 44px tall below 1024px (DESIGN.md §16: admin controls), inline on desktop.
+const contactLink = "inline-flex min-h-11 min-w-11 items-center font-bold lg:min-h-0 lg:min-w-0";
 const yesNo = (v: boolean | null) => (v === null ? null : v ? "Yes" : "No");
 
 export default async function Page({
@@ -30,10 +38,10 @@ export default async function Page({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; done?: string }>;
 }) {
   const { supabase } = await requireAdmin();
-  const [{ id }, { error }] = await Promise.all([params, searchParams]);
+  const [{ id }, { error, done }] = await Promise.all([params, searchParams]);
   if (!/^[0-9a-f-]{36}$/.test(id)) notFound();
   const { data: dog } = await supabase
     .from("dogs")
@@ -78,17 +86,24 @@ export default async function Page({
     ["Why they need a new home", dog.rehoming_reason],
     ["Other information", dog.other_info],
     ["Video", dog.video_url],
+    ["Admin notes (never public)", dog.admin_notes],
   ];
 
   return (
     <>
-      <Link href="/admin" className="text-sm font-bold">
-        ← All listings
+      <Link href="/admin/dogs" className="inline-flex min-h-11 items-center self-start text-sm font-bold lg:min-h-0">
+        ← All dogs
       </Link>
       <h1 className="font-display text-[26px] font-extrabold tracking-[-0.03em]">{dogTitle(dog)}</h1>
-      <p className="text-sm text-muted">
-        Status: {dog.status} · Submitted {submittedLabel(dog.created_at)}
+      <p className="flex flex-wrap items-center gap-2 text-sm text-muted">
+        <StatusChip tone={DOG_STATUS[dog.status].tone}>{DOG_STATUS[dog.status].label}</StatusChip>
+        Submitted {submittedLabel(dog.created_at)}
       </p>
+      {done && done in NOTICES && (
+        <p role="status" className="rounded-[16px] border-2 border-ink bg-fresh px-3.5 py-2.5 text-sm font-bold">
+          {NOTICES[done as keyof typeof NOTICES]}
+        </p>
+      )}
       {error && error in ERRORS && <ErrorState>{ERRORS[error as keyof typeof ERRORS]}</ErrorState>}
 
       <section className="flex flex-col gap-2">
@@ -122,12 +137,12 @@ export default async function Page({
             <dt className="font-bold">Relationship</dt>
             <dd>{RELATIONSHIP_LABEL[lister.relationship]}</dd>
             <dt className="font-bold">Phone</dt>
-            <dd className="flex flex-wrap gap-3">
+            <dd className="flex flex-wrap items-center gap-x-3">
               {lister.phone}
-              <a href={`tel:${lister.phone}`} className="font-bold">
+              <a href={`tel:${lister.phone}`} className={contactLink}>
                 Call
               </a>
-              <a href={`https://wa.me/${digits}`} target="_blank" rel="noopener noreferrer" className="font-bold">
+              <a href={`https://wa.me/${digits}`} target="_blank" rel="noopener noreferrer" className={contactLink}>
                 WhatsApp
               </a>
             </dd>
@@ -155,8 +170,39 @@ export default async function Page({
         </dl>
       </section>
 
+      {dog.status === "approved" && (
+        <div className="flex flex-wrap items-start gap-3">
+          <Link href={`/admin/dogs/${dog.id}/edit`} className={adminButton}>
+            Edit
+          </Link>
+          <details className="rounded-[10px]">
+            <summary className={`${adminButton} cursor-pointer list-none`}>Mark adopted…</summary>
+            <form action={markAdopted} className="mt-2 flex flex-col items-start gap-2 text-sm">
+              <p>{dog.name} leaves Find a Dog and everyone&rsquo;s results. Enquiries are kept.</p>
+              <input type="hidden" name="id" value={dog.id} />
+              <button type="submit" className={adminButton.replace("bg-surface", "bg-fresh font-extrabold")}>
+                Yes, {dog.name} was adopted
+              </button>
+            </form>
+          </details>
+          <details className="rounded-[10px]">
+            <summary className={`${adminButton} cursor-pointer list-none`}>Remove…</summary>
+            <form action={removeDog} className="mt-2 flex flex-col items-start gap-2 text-sm">
+              <p>The listing comes down and its photos are deleted. This can&rsquo;t be undone. Enquiries are kept.</p>
+              <input type="hidden" name="id" value={dog.id} />
+              <button type="submit" className={adminButton.replace("bg-surface", "bg-bubble font-extrabold")}>
+                Yes, remove this listing
+              </button>
+            </form>
+          </details>
+        </div>
+      )}
+
       {dog.status === "pending" && (
         <div className="flex flex-wrap items-start gap-3">
+          <Link href={`/admin/dogs/${dog.id}/edit`} className={adminButton}>
+            Edit
+          </Link>
           <form action={approveDog}>
             <input type="hidden" name="id" value={dog.id} />
             <button type="submit" className={adminButton.replace("bg-surface", "bg-fresh font-extrabold")}>

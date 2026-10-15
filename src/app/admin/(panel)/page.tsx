@@ -4,10 +4,10 @@ import { approveDog } from "@/app/admin/dog-actions";
 import { AdminTable, adminButton } from "@/components/ui/AdminTable";
 import { StatusChip } from "@/components/ui/Chip";
 import { EmptyState, ErrorState } from "@/components/ui/States";
-import { RELATIONSHIP_LABEL, dogTitle, submittedLabel } from "@/lib/admin-format";
+import { MATCH_STATUSES, RELATIONSHIP_LABEL, dogTitle, submittedLabel } from "@/lib/admin-format";
 import { requireAdmin } from "@/lib/server/auth";
 
-export const metadata: Metadata = { title: "Listings", robots: { index: false } };
+export const metadata: Metadata = { title: "Overview", robots: { index: false } };
 
 const NOTICES = {
   approved: "Listing approved. It's live on Find a Dog.",
@@ -17,15 +17,43 @@ const NOTICES = {
 export default async function Page({ searchParams }: { searchParams: Promise<{ done?: string }> }) {
   const { supabase } = await requireAdmin();
   const { done } = await searchParams;
-  const { data: dogs, error } = await supabase
-    .from("dogs")
-    .select("id, name, age_months, breed, locality, urgent, created_at, listers(relationship)")
-    .eq("status", "pending")
-    .order("created_at");
+  const head = { count: "exact", head: true } as const;
+  const dogCount = (status: "approved" | "pending" | "adopted") =>
+    supabase.from("dogs").select("id", head).eq("status", status);
+  const [live, pending, adopted, adopters, interests, matches, { data: dogs, error }] = await Promise.all([
+    dogCount("approved"),
+    dogCount("pending"),
+    dogCount("adopted"),
+    supabase.from("adopters").select("id", head),
+    supabase.from("enquiries").select("id", head),
+    supabase.from("enquiries").select("id", head).in("status", MATCH_STATUSES),
+    supabase
+      .from("dogs")
+      .select("id, name, age_months, breed, locality, urgent, created_at, listers(relationship)")
+      .eq("status", "pending")
+      .order("created_at"),
+  ]);
+  const tiles: [string, number | null, string][] = [
+    ["Dogs", live.count, `live · ${pending.count ?? "—"} waiting`],
+    ["Adopters", adopters.count, "questionnaires sent"],
+    ["Interests", interests.count, "enquiries"],
+    ["Matches", matches.count, "meeting or later"],
+    ["Adoptions", adopted.count, "dogs adopted"],
+  ];
 
   return (
     <>
-      <h1 className="font-display text-[26px] font-extrabold tracking-[-0.03em]">Listings waiting for approval</h1>
+      <h1 className="font-display text-[26px] font-extrabold tracking-[-0.03em]">Overview</h1>
+      <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        {tiles.map(([label, n, note]) => (
+          <div key={label} className="flex flex-col gap-0.5 rounded-[16px] border-2 border-ink bg-surface px-4 py-3.5">
+            <dt className="text-[13px] font-bold text-muted">{label}</dt>
+            <dd className="font-display text-[28px] font-extrabold tabular-nums">{n ?? "—"}</dd>
+            <dd className="text-xs text-muted">{note}</dd>
+          </div>
+        ))}
+      </dl>
+      <h2 className="text-[17px] font-extrabold">Listings waiting for approval</h2>
       {done && done in NOTICES && (
         <p role="status" className="rounded-[16px] border-2 border-ink bg-fresh px-3.5 py-2.5 text-sm font-bold">
           {NOTICES[done as keyof typeof NOTICES]}

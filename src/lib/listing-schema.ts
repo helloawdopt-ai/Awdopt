@@ -65,8 +65,14 @@ export type ListingValues = z.infer<typeof listingSchema>;
 const nul = <T extends string>(v: T | "") => (v === "" ? null : v);
 const bool = (v: "yes" | "no" | "") => (v === "" ? null : v === "yes");
 
+/** The dog's own fields (no lister details or consent): the admin edit form validates these. */
+export type DogValues = Omit<
+  ListingValues,
+  "lister_name" | "lister_phone" | "lister_email" | "relationship" | "consent"
+>;
+
 /** Validated form values → submit_listing's `dog` object (blanks become NULL). */
-export function toDog(v: ListingValues) {
+export function toDog(v: DogValues) {
   const age = v.age_years === "" && v.age_months === "" ? null : +(v.age_years || 0) * 12 + +(v.age_months || 0);
   return {
     name: v.name,

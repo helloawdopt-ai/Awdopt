@@ -20,3 +20,13 @@ export function submittedLabel(iso: string, now = new Date()) {
   if (day(new Date(iso)) === day(yesterday)) return "Yesterday";
   return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: "Asia/Kolkata" });
 }
+
+export const DOG_STATUS = {
+  pending: { label: "Waiting", tone: "highlight" },
+  approved: { label: "Live", tone: "fresh" },
+  adopted: { label: "Adopted", tone: "plain" },
+  removed: { label: "Removed", tone: "plain" },
+} as const;
+
+/** "Matches" on the overview: enquiries that reached a meeting (there's no status history). */
+export const MATCH_STATUSES = ["meeting", "adoption_in_progress", "adopted", "adoption_unsuccessful"] as const;

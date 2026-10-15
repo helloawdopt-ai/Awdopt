@@ -1,11 +1,11 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { signOut } from "@/app/admin/auth-actions";
+import { NavLink } from "@/components/admin/NavLink";
 import { Logo } from "@/components/brand/Logo";
 import { requireAdmin } from "@/lib/server/auth";
 
 // Admin (kept simple, desktop-first, usable at 390px). Calm zone: no tilt or sparkles.
-// Adopters, enquiries and weights join the nav in M4.
 export default async function PanelLayout({ children }: { children: ReactNode }) {
   const { supabase, email } = await requireAdmin();
   const { count } = await supabase.from("dogs").select("id", { count: "exact", head: true }).eq("status", "pending");
@@ -22,17 +22,15 @@ export default async function PanelLayout({ children }: { children: ReactNode })
         <span className="hidden text-xs font-extrabold tracking-[0.08em] text-muted uppercase lg:mt-3.5 lg:block">
           Admin
         </span>
-        <Link
-          href="/admin"
-          className="flex min-h-11 items-center justify-between gap-2 rounded-[12px] border-2 border-ink bg-highlight px-3 text-[15px] font-extrabold no-underline lg:min-h-10"
-        >
-          Listings
+        <NavLink href="/admin">Overview</NavLink>
+        <NavLink href="/admin/dogs">
+          Dogs
           {!!count && (
             <span className="rounded-full border-[1.5px] border-ink bg-primary px-[7px] py-px text-xs font-extrabold">
               {count} pending
             </span>
           )}
-        </Link>
+        </NavLink>
         <div className="ml-auto flex flex-col text-xs leading-[1.4] text-muted lg:mt-auto lg:ml-0">
           <span>{email} · 2-step verified</span>
           <form action={signOut}>

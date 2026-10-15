@@ -1,5 +1,6 @@
-import { expect, request, test, type Request } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import {
+  captureAction,
   deleteListings,
   deleteUsers,
   devReady,
@@ -7,6 +8,7 @@ import {
   listObjects,
   makeUser,
   pendingListing,
+  replayWithoutAal2,
   signIn,
   totp,
 } from "./admin-helpers";
@@ -51,9 +53,7 @@ test("signed out: admin pages and /brand go to the login", async ({ page }) => {
   // Prefetch-looking requests skip the proxy; the page's own requireAdmin() must still refuse.
   for (const path of ["/admin", `/admin/dogs/${approve.id}`, "/brand"]) {
     const r = await page.request.get(path, { headers: { purpose: "prefetch" }, maxRedirects: 0 });
-    expect(await r.text(), path).not.toMatch(
-      /Listings waiting for approval<\/h1>|Lister \(never public\)|Open filters/,
-    );
+    expect(await r.text(), path).not.toMatch(/Overview<\/h1>|Lister \(never public\)|Open filters/);
   }
   const res = await page.goto("/admin/login");
   expect(res?.headers()["x-robots-tag"]).toBe("noindex");
@@ -103,44 +103,10 @@ test("admin: TOTP set-up, queue, magic-byte check, approve, reject", async ({ br
   await page.setViewportSize({ width: 1280, height: 860 });
 
   // Capture the real approve request, block it, and replay it without an aal2 admin session.
-  let captured: Request | undefined;
-  await page.route("**/admin", async (route) => {
-    if (route.request().method() === "POST") {
-      captured = route.request();
-      return route.abort();
-    }
-    return route.continue();
-  });
-  await page.getByRole("button", { name: `Approve ${PREFIX} Approve` }).click();
-  await expect.poll(() => captured).toBeTruthy();
-  await page.unroute("**/admin");
-  const statuses: string[] = [];
-  const replay = async (ctx: Awaited<ReturnType<typeof request.newContext>>) => {
-    const headers = Object.fromEntries(
-      Object.entries(captured!.headers()).filter(([k]) => !["cookie", "content-length", "host"].includes(k)),
-    );
-    // The proxy skips prefetch-looking requests (its matcher), and anyone can send those headers.
-    // That path reaches the action itself, so this checks requireAdmin(), not just the proxy.
-    for (const extra of [{}, { purpose: "prefetch" }, { "next-router-prefetch": "1" }] as Record<string, string>[]) {
-      const res = await ctx.post(captured!.url(), {
-        headers: { ...headers, ...extra },
-        data: captured!.postDataBuffer()!,
-        maxRedirects: 0,
-      });
-      statuses.push(
-        `${Object.keys(extra)[0] ?? "plain"} ${res.status()} ${res.headers()["x-action-redirect"] ?? res.headers()["location"] ?? ""}`,
-      );
-    }
-  };
-  const anon = await request.newContext({ baseURL });
-  await replay(anon);
-  await anon.dispose();
-  const aal1 = await browser.newContext({ baseURL });
-  const aal1Page = await aal1.newPage();
-  await signIn(aal1Page, adminNoMfa);
-  await expect(aal1Page).toHaveURL(/\/admin\/mfa$/);
-  await replay(aal1.request);
-  await aal1.close();
+  const captured = await captureAction(page, () =>
+    page.getByRole("button", { name: `Approve ${PREFIX} Approve` }).click(),
+  );
+  const statuses = await replayWithoutAal2(browser, baseURL!, captured, adminNoMfa);
   console.log("replayed approve without aal2:", statuses.join(", "));
   expect(await dogStatus(approve.id)).toBe("pending");
   expect(await listObjects("dog-photos", approve.id)).toEqual([]);
