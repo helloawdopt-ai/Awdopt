@@ -10,6 +10,9 @@ const DOG = "E2E Test Dog";
 
 test.skip(!key || new URL(url || "http://x").host !== "bdrkuwznuuklrryxddba.supabase.co", "needs .env.local (dev)");
 
+// One worker for this file, so another worker's cleanup can't delete the listing mid-test.
+test.describe.configure({ mode: "serial" });
+
 async function cleanup() {
   const dogs = (await (
     await fetch(`${url}/rest/v1/dogs?name=eq.${encodeURIComponent(DOG)}&select=id,lister_id`, { headers: h })
@@ -43,7 +46,7 @@ const photo = () =>
 
 async function shot(page: Page, name: string) {
   await page.evaluate(() => document.fonts.ready);
-  await page.screenshot({ path: `docs/private/reviews/M2/${name}.png`, fullPage: true });
+  await page.screenshot({ path: `screenshots/M2/${name}.png`, fullPage: true });
 }
 
 test("list a dog: 5 steps, photo pipeline, Turnstile, pending in the DB", async ({ page }) => {

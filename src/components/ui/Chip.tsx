@@ -77,7 +77,7 @@ export function StatusChip({ tone = "plain", children }: { tone?: keyof typeof s
   return (
     <span
       className={cx(
-        "inline-flex items-center whitespace-nowrap rounded-full border-[1.5px] border-ink px-2 py-px text-xs font-extrabold",
+        "inline-flex items-center whitespace-nowrap rounded-full border-[1.5px] border-ink px-2 py-px text-xs font-extrabold text-ink",
         statusTone[tone],
       )}
     >

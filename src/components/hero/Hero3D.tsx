@@ -96,15 +96,35 @@ export function Hero3D({ children, className }: { children: ReactNode; className
     };
     const idle = (fn: () => void) =>
       "requestIdleCallback" in window ? requestIdleCallback(fn, { timeout: 3000 }) : setTimeout(fn, 1200);
+    // The three.js chunk is ~0.5 s of main-thread work on a slow phone. Start it on the first sign of a
+    // visitor (touch, pointer, key, scroll) or 4 s after `load`, so it never competes with the page
+    // loading. The poster looks the same until then.
+    const EVENTS = ["pointerdown", "pointermove", "keydown", "scroll", "touchstart"] as const;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let armed = true;
+    const go = () => {
+      if (!armed) return;
+      armed = false;
+      clearTimeout(timer);
+      for (const e of EVENTS) removeEventListener(e, go);
+      removeEventListener("load", arm);
+      if (!cancelled) idle(start);
+    };
+    const arm = () => (timer = setTimeout(go, 4000));
     const io = new IntersectionObserver(([entry]) => {
       if (!entry?.isIntersecting) return;
       io.disconnect();
-      idle(start);
+      for (const e of EVENTS) addEventListener(e, go, { once: true, passive: true });
+      if (document.readyState === "complete") arm();
+      else addEventListener("load", arm, { once: true });
     });
     io.observe(el);
     return () => {
       cancelled = true;
       io.disconnect();
+      clearTimeout(timer);
+      for (const e of EVENTS) removeEventListener(e, go);
+      removeEventListener("load", arm);
       dispose?.();
     };
   }, []);

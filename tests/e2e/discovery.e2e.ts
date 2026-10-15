@@ -29,7 +29,7 @@ for (const [width, height] of WIDTHS) {
       });
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
       expect(overflow).toBeLessThanOrEqual(0);
-      await page.screenshot({ path: `docs/private/reviews/M2/${name}-${width}.png`, fullPage: true });
+      await page.screenshot({ path: `screenshots/M2/${name}-${width}.png`, fullPage: true });
     });
   }
 }
@@ -40,7 +40,7 @@ test("filters sheet at 390px: screenshot", async ({ page }) => {
   await page.getByRole("button", { name: /Filters · 2/ }).click();
   await expect(page.getByRole("dialog", { name: "Filters" })).toBeVisible();
   await page.waitForTimeout(300);
-  await page.screenshot({ path: "docs/private/reviews/M2/filters-390.png" });
+  await page.screenshot({ path: "screenshots/M2/filters-390.png" });
 });
 
 test("discovery lists approved dogs only", async ({ page }) => {
@@ -94,7 +94,7 @@ test("desktop: sidebar filters by area and age", async ({ page }) => {
   await side.getByRole("button", { name: "Show dogs" }).click();
   await expect(page).toHaveURL(/area=western&age=puppy/);
   await expect(page.getByRole("main").getByRole("heading", { level: 2, name: "Sample Pepper" })).toBeVisible();
-  await expect(page.getByText("1 dog match your filters · Mumbai")).toBeVisible();
+  await expect(page.getByText("1 dog matches your filters · Mumbai")).toBeVisible();
 });
 
 test("no matches shows the empty state", async ({ page }) => {

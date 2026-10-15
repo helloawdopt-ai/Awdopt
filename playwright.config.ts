@@ -9,7 +9,21 @@ export default defineConfig({
   fullyParallel: true,
   reporter: [["list"]],
   use: { baseURL: process.env.E2E_BASE_URL ?? `http://localhost:${PORT}` },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    { name: "chromium", use: { ...devices["Desktop Chrome"] }, testIgnore: "**/admin-weights.e2e.ts" },
+    // Changes the shared weights and constraints, so it runs alone, after everything that scores.
+    {
+      name: "weights",
+      use: { ...devices["Desktop Chrome"] },
+      testMatch: "**/admin-weights.e2e.ts",
+      dependencies: ["chromium"],
+    },
+    // Safari's engine on an iPhone-sized screen: `E2E_WEBKIT=1 npm run e2e -- --project=webkit`.
+    // A stand-in for real iPhone checks, not a replacement (needs `npx playwright install webkit`).
+    ...(process.env.E2E_WEBKIT
+      ? [{ name: "webkit", use: { ...devices["iPhone 14"] }, testIgnore: "**/admin-weights.e2e.ts" }]
+      : []),
+  ],
   // Production build, so headers and CSP match what Vercel serves.
   webServer: process.env.E2E_BASE_URL
     ? undefined

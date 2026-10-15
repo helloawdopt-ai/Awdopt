@@ -24,7 +24,12 @@ export function AdminTable({ label, children }: { label: string; children: React
 }
 
 /** Native <select> used for the 8 enquiry statuses. */
-export const adminSelect = "h-11 lg:h-9 rounded-[10px] border-2 border-ink bg-surface px-2 text-sm font-bold text-ink";
+// 16px text below 1024px, so phones don't zoom on focus.
+export const adminSelect =
+  "h-11 lg:h-9 rounded-[10px] border-2 border-ink bg-surface px-2 text-base lg:text-sm font-bold text-ink";
+
+/** Links in admin tables: 44px tall below 1024px, inline on desktop. */
+export const adminLink = "inline-flex min-h-11 items-center font-extrabold lg:min-h-0";
 
 export const adminButton =
   "press inline-flex h-11 lg:h-9 items-center rounded-[10px] border-2 border-ink bg-surface px-3 font-bold hover:bg-bg active:translate-[2px]";

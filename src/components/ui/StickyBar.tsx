@@ -8,14 +8,13 @@ export function StickyBar({ children, className }: { children: ReactNode; classN
   const bar = useRef<HTMLDivElement>(null);
 
   // Browsers skip focus-scrolling when a field is partly on screen, leaving it under the bar.
-  // scrollIntoView honours html's scroll-padding-bottom, so the focused field clears the bar.
+  // Scroll by the overlap ourselves: WebKit's scrollIntoView ignores html's scroll-padding-bottom.
   useEffect(() => {
     const onFocus = (e: FocusEvent) => {
       const el = e.target as HTMLElement;
       if (!bar.current || bar.current.contains(el)) return;
-      if (el.getBoundingClientRect().bottom > bar.current.getBoundingClientRect().top) {
-        el.scrollIntoView({ block: "nearest" });
-      }
+      const overlap = el.getBoundingClientRect().bottom - bar.current.getBoundingClientRect().top;
+      if (overlap > 0) window.scrollBy({ top: overlap + 16 });
     };
     document.addEventListener("focusin", onFocus);
     return () => document.removeEventListener("focusin", onFocus);

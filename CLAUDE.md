@@ -32,13 +32,14 @@ Mobile-first Next.js app matching adopters with dogs by a rule-based score. Publ
 
 ## Scope
 
-- `docs/private/SCOPE.md` §2 lists the only 15 deliverables. Nothing from §4 "Out of scope".
-- Out-of-scope ideas go to `docs/private/SUGGESTIONS.md`, one line each.
-- Never reference anything in `docs/private/` from public files.
+- The signed scope, client brief and decision log are private and git-ignored (ask the developer for them).
+  Build only the 15 scope deliverables; nothing from its "Out of scope" list.
+- Out-of-scope ideas go to the private suggestions list, one line each. Never quote or link private docs from
+  public files.
 
 ## Sources of truth (read before coding a screen)
 
-- `docs/private/SCOPE.md` > `docs/private/BRIEF.md` (scope wins); `docs/private/DECISIONS.md` overrides defaults.
+- Scope > brief (scope wins); the decision log overrides defaults.
 - `docs/DESIGN.md` is the brand. `docs/design/prototype/*.dc.html` are reference only: never import or ship them.
 - Precedence: Scope > Security & privacy > Accessibility & performance > DESIGN.md > Prototype > Taste > Minimal code.
 

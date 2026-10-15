@@ -11,6 +11,10 @@ const E164 = "+917000000042";
 
 test.skip(!key || new URL(url || "http://x").host !== "bdrkuwznuuklrryxddba.supabase.co", "needs .env.local (dev)");
 
+// One worker for this file: under fullyParallel every worker runs afterAll, and another worker's
+// cleanup deleted the adopter while the first test was still loading its results page.
+test.describe.configure({ mode: "serial" });
+
 const cleanup = () =>
   fetch(`${url}/rest/v1/adopters?phone=eq.${encodeURIComponent(E164)}`, { method: "DELETE", headers: h });
 test.beforeAll(cleanup);
@@ -19,7 +23,7 @@ test.afterAll(cleanup);
 async function shot(page: Page, name: string) {
   await page.evaluate(() => document.fonts.ready);
   await page.waitForFunction(() => [...document.images].every((img) => img.complete));
-  await page.screenshot({ path: `docs/private/reviews/M3/${name}.png`, fullPage: true });
+  await page.screenshot({ path: `screenshots/M3/${name}.png`, fullPage: true });
 }
 const group = (page: Page, name: string) => page.getByRole("group", { name });
 
@@ -95,7 +99,7 @@ test("questionnaire: 5 steps, progress kept on refresh, 18+, consent, results li
   await expect(page.getByText("sniffing out")).toBeVisible();
   await expect(page.getByRole("status").getByText("Special-needs fit")).toBeVisible();
   await page.waitForTimeout(1000); // the 8 ticks land 120ms apart
-  await page.screenshot({ path: "docs/private/reviews/M3/matching-390.png" });
+  await page.screenshot({ path: "screenshots/M3/matching-390.png" });
   await expect(page).toHaveURL(/\/r\/[A-Za-z0-9_-]{43}$/, { timeout: 20_000 });
   await expect(page.getByRole("heading", { level: 1, name: "Your top matches" })).toBeVisible();
   expect(await smallTargets(page), "results").toEqual([]);
