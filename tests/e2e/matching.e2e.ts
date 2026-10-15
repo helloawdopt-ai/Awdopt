@@ -23,6 +23,16 @@ async function shot(page: Page, name: string) {
 }
 const group = (page: Page, name: string) => page.getByRole("group", { name });
 
+/** Buttons, links and option labels under 44px (DESIGN.md §6). Links inside a sentence are exempt. */
+const smallTargets = (page: Page) =>
+  page.$$eval("a, button, label:has(input.sr-only)", (els) =>
+    els
+      .filter((el) => (el as HTMLElement).offsetParent !== null && !el.parentElement?.closest("p, label"))
+      .map((el) => ({ text: el.textContent?.trim() || el.getAttribute("aria-label"), box: el.getBoundingClientRect() }))
+      .filter(({ box }) => box.height < 44 || box.width < 44)
+      .map(({ text }) => text),
+  );
+
 test("questionnaire: 5 steps, progress kept on refresh, 18+, consent, results link", async ({ page }) => {
   test.setTimeout(90_000);
   const violations: string[] = [];
@@ -88,6 +98,7 @@ test("questionnaire: 5 steps, progress kept on refresh, 18+, consent, results li
   await page.screenshot({ path: "docs/private/reviews/M3/matching-390.png" });
   await expect(page).toHaveURL(/\/r\/[A-Za-z0-9_-]{43}$/, { timeout: 20_000 });
   await expect(page.getByRole("heading", { level: 1, name: "Your top matches" })).toBeVisible();
+  expect(await smallTargets(page), "results").toEqual([]);
 
   // Seeded dogs ranked best first, each with a score; Pepper and Rocket (2 h alone at most) and
   // Tofu (needs a large space) are left out, with a line saying why.
@@ -150,6 +161,7 @@ test("questionnaire: 5 steps, progress kept on refresh, 18+, consent, results li
     "href",
     new URL(link).pathname,
   );
+  expect(await smallTargets(page), "detail").toEqual([]);
   for (const [w, hgt] of [
     [390, 844],
     [360, 800],
@@ -178,6 +190,7 @@ test("questionnaire: 5 steps, progress kept on refresh, 18+, consent, results li
   await expect(page.getByText("We filled this in from your answers.")).toBeVisible();
   await expect(page.getByLabel("Your name")).toHaveValue("E2E Adopter");
   await expect(page.getByLabel("Phone / WhatsApp")).toHaveValue(PHONE);
+  expect(await smallTargets(page), "interested").toEqual([]);
   await page.getByRole("button", { name: "Send my interest" }).click();
   await expect(page.getByText("Please confirm so the team can contact you")).toBeVisible();
   await page.getByLabel("Message").fill("E2E test message");
@@ -270,6 +283,14 @@ test("results links are private: headers, wrong and malformed tokens", async ({ 
   await page.goto(wrong);
   await expect(page.getByRole("heading", { name: "This link doesn't work" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Take the quiz again" })).toHaveAttribute("href", "/match/basic");
+});
+
+test("questionnaire: every target is at least 44px at 360", async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 800 });
+  for (const step of ["basic", "home", "lifestyle", "preferences", "intent"]) {
+    await page.goto(`/match/${step}`);
+    expect(await smallTargets(page), step).toEqual([]);
+  }
 });
 
 test("questionnaire steps at 360, 768 and 1440", async ({ page }) => {

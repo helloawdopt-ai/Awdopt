@@ -18,8 +18,6 @@ export const metadata: Metadata = { title: "Your match", robots: { index: false,
 
 type Props = { params: Promise<{ token: string; dogSlug: string }> };
 
-const RANGE: Record<string, string> = { "Great fit": "85+", "Good fit": "70–84", "Worth a look": "Under 70" };
-
 /** Match detail (Why.dc.html): score, all 8 bars, why this could work / things to consider. */
 export default async function Page({ params }: Props) {
   const { token, dogSlug } = await params;
@@ -74,7 +72,7 @@ export default async function Page({ params }: Props) {
                 </span>
               </h1>
               <span className={cx("rounded-full border-2 border-ink px-2.5 py-0.5 text-xs font-extrabold", level.tone)}>
-                {RANGE[level.label]}
+                {level.range}
               </span>
             </div>
             <p className="text-sm text-muted">{basis}</p>
@@ -99,30 +97,33 @@ export default async function Page({ params }: Props) {
             })}
           </section>
 
-          <section className="flex flex-col gap-2.5">
-            <h2 className={overline}>Why this could work</h2>
-            <ul className="flex flex-col gap-2.5">
-              {(why.length ? why : [`Nothing stands out yet. Meeting ${dog.name} is the best way to find out.`]).map(
-                (line) => (
-                  <ReasonLine key={line} kind="why">
+          {(
+            [
+              [
+                "why",
+                "Why this could work",
+                why,
+                `Nothing stands out yet. Meeting ${dog.name} is the best way to find out.`,
+              ],
+              [
+                "consider",
+                "Things to consider",
+                consider,
+                `Nothing stood out. Meeting ${dog.name} is still the best test.`,
+              ],
+            ] as const
+          ).map(([kind, title, lines, fallback]) => (
+            <section key={kind} className="flex flex-col gap-2.5">
+              <h2 className={overline}>{title}</h2>
+              <ul className="flex flex-col gap-2.5">
+                {(lines.length ? lines : [fallback]).map((line) => (
+                  <ReasonLine key={line} kind={kind}>
                     {line}
                   </ReasonLine>
-                ),
-              )}
-            </ul>
-          </section>
-          <section className="flex flex-col gap-2.5">
-            <h2 className={overline}>Things to consider</h2>
-            <ul className="flex flex-col gap-2.5">
-              {(consider.length ? consider : [`Nothing stood out. Meeting ${dog.name} is still the best test.`]).map(
-                (line) => (
-                  <ReasonLine key={line} kind="consider">
-                    {line}
-                  </ReasonLine>
-                ),
-              )}
-            </ul>
-          </section>
+                ))}
+              </ul>
+            </section>
+          ))}
 
           <Link
             href={`${base}/profile`}

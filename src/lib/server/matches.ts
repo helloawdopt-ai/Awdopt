@@ -73,10 +73,7 @@ export type Results = {
  */
 export async function getResults(token: string, slug?: string): Promise<Results | null> {
   if (!isToken(token)) return null;
-  const { data, error } = await service().rpc("results_for_token", {
-    p_token_hash: tokenHash(token),
-    ...(slug ? { p_slug: slug } : {}),
-  });
+  const { data, error } = await service().rpc("results_for_token", { p_token_hash: tokenHash(token), p_slug: slug });
   if (error) throw new Error("Could not load matches");
   return data as Results | null;
 }

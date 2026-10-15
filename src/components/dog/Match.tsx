@@ -6,9 +6,9 @@ import { DogPhoto, type Photo } from "./DogPhoto";
 
 /** Match level from DESIGN.md §3: 85+ Great fit (Mint), 70–84 Good fit (Butter), else Worth a look. */
 export function fitLevel(score: number) {
-  if (score >= 85) return { label: "Great fit", tone: "bg-fresh" } as const;
-  if (score >= 70) return { label: "Good fit", tone: "bg-highlight" } as const;
-  return { label: "Worth a look", tone: "bg-surface" } as const;
+  if (score >= 85) return { label: "Great fit", tone: "bg-fresh", range: "85+" } as const;
+  if (score >= 70) return { label: "Good fit", tone: "bg-highlight", range: "70–84" } as const;
+  return { label: "Worth a look", tone: "bg-surface", range: "Under 70" } as const;
 }
 
 export function LimitedInfoTag() {
@@ -55,7 +55,7 @@ export function MatchRow({ href, rank, name, meta, reason, score, confidence, ph
       <div className="flex min-w-0 grow flex-col gap-[3px]">
         <div className="flex items-baseline gap-1.5">
           <span className="text-[13px] font-extrabold text-muted">#{rank}</span>
-          <h3 className="truncate font-display text-[19px] font-extrabold tracking-[-0.03em]">{name}</h3>
+          <h2 className="truncate font-display text-[19px] font-extrabold tracking-[-0.03em]">{name}</h2>
         </div>
         <span className="text-[13px] text-muted">{meta}</span>
         <span className="text-[13px] leading-snug">{reason}</span>

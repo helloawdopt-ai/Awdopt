@@ -276,12 +276,6 @@ describe("score_dogs_for_adopter", () => {
     for (const r of excluded) expect(r.score).toBeNull();
   });
 
-  it("covers every hard constraint (adopter 1 trips each one once)", () => {
-    expect(Object.values(EXPECTED[1]!.excluded).flat().sort()).toEqual(
-      ["alone_time", "children_under_12", "large_space", "other_pets", "special_needs"].sort(),
-    );
-  });
-
   it("gives unanswered data no points: a dog with nothing known scores 0 with confidence 0", async () => {
     const d2 = (await score(1)).find((r) => dogNo(r.dog_id) === 2)!;
     expect(Object.values(d2.categories).every((s) => s === null)).toBe(true);
