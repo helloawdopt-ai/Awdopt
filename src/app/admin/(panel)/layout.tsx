@@ -31,6 +31,7 @@ export default async function PanelLayout({ children }: { children: ReactNode })
             </span>
           )}
         </NavLink>
+        <NavLink href="/admin/adopters">Adopters</NavLink>
         <div className="ml-auto flex flex-col text-xs leading-[1.4] text-muted lg:mt-auto lg:ml-0">
           <span>{email} · 2-step verified</span>
           <form action={signOut}>

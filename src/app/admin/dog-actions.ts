@@ -41,18 +41,20 @@ export async function approveDog(formData: FormData) {
   const paths = photoPaths(dog);
   if (!paths.length) redirect(`/admin/dogs/${id}?error=photos`);
 
+  // Checks run in parallel, then copies: six sequential Storage calls took ~4.5s.
   const uploads = supabase.storage.from("listing-uploads");
-  for (const path of paths) {
-    const { data: file } = await uploads.download(path);
-    const ext = path.split(".").pop() ?? "";
-    const bytes = file && file.size <= 2 * 1024 * 1024 ? new Uint8Array(await file.slice(0, 16).arrayBuffer()) : null;
-    if (!bytes || !MAGIC[ext]?.(bytes)) redirect(`/admin/dogs/${id}?error=photos`);
-  }
-  for (const path of paths) {
-    const { error } = await uploads.copy(path, path, { destinationBucket: "dog-photos" });
-    // Already copied by an earlier, interrupted approval: fine.
-    if (error && !/exists/i.test(error.message)) redirect(`/admin/dogs/${id}?error=failed`);
-  }
+  const real = await Promise.all(
+    paths.map(async (path) => {
+      const { data: file } = await uploads.download(path);
+      const ext = path.split(".").pop() ?? "";
+      const bytes = file && file.size <= 2 * 1024 * 1024 ? new Uint8Array(await file.slice(0, 16).arrayBuffer()) : null;
+      return !!bytes && !!MAGIC[ext]?.(bytes);
+    }),
+  );
+  if (!real.every(Boolean)) redirect(`/admin/dogs/${id}?error=photos`);
+  const copies = await Promise.all(paths.map((path) => uploads.copy(path, path, { destinationBucket: "dog-photos" })));
+  // Already copied by an earlier, interrupted approval: fine.
+  if (copies.some(({ error }) => error && !/exists/i.test(error.message))) redirect(`/admin/dogs/${id}?error=failed`);
   const { error } = await supabase
     .from("dogs")
     .update({ status: "approved", approved_at: new Date().toISOString() })

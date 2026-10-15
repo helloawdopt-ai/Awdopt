@@ -5,7 +5,7 @@ import { approveDog, markAdopted, rejectDog, removeDog } from "@/app/admin/dog-a
 import { adminButton } from "@/components/ui/AdminTable";
 import { StatusChip } from "@/components/ui/Chip";
 import { ErrorState } from "@/components/ui/States";
-import { DOG_STATUS, RELATIONSHIP_LABEL, dogTitle, submittedLabel } from "@/lib/admin-format";
+import { DOG_STATUS, RELATIONSHIP_LABEL, dogTitle, submittedLabel, whatsApp } from "@/lib/admin-format";
 import {
   ENERGY_LABEL,
   HANDLING_LABEL,
@@ -59,7 +59,6 @@ export default async function Page({
       )
     : { data: [] };
   const lister = dog.listers;
-  const digits = lister?.phone.replace(/\D/g, "");
 
   const facts: [string, string | null][] = [
     ["Sex", dog.sex && SEX_LABEL[dog.sex]],
@@ -142,7 +141,7 @@ export default async function Page({
               <a href={`tel:${lister.phone}`} className={contactLink}>
                 Call
               </a>
-              <a href={`https://wa.me/${digits}`} target="_blank" rel="noopener noreferrer" className={contactLink}>
+              <a href={whatsApp(lister.phone)} target="_blank" rel="noopener noreferrer" className={contactLink}>
                 WhatsApp
               </a>
             </dd>

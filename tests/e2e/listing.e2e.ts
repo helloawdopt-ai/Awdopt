@@ -10,6 +10,9 @@ const DOG = "E2E Test Dog";
 
 test.skip(!key || new URL(url || "http://x").host !== "bdrkuwznuuklrryxddba.supabase.co", "needs .env.local (dev)");
 
+// One worker for this file, so another worker's cleanup can't delete the listing mid-test.
+test.describe.configure({ mode: "serial" });
+
 async function cleanup() {
   const dogs = (await (
     await fetch(`${url}/rest/v1/dogs?name=eq.${encodeURIComponent(DOG)}&select=id,lister_id`, { headers: h })

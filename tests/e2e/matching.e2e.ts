@@ -11,6 +11,10 @@ const E164 = "+917000000042";
 
 test.skip(!key || new URL(url || "http://x").host !== "bdrkuwznuuklrryxddba.supabase.co", "needs .env.local (dev)");
 
+// One worker for this file: under fullyParallel every worker runs afterAll, and another worker's
+// cleanup deleted the adopter while the first test was still loading its results page.
+test.describe.configure({ mode: "serial" });
+
 const cleanup = () =>
   fetch(`${url}/rest/v1/adopters?phone=eq.${encodeURIComponent(E164)}`, { method: "DELETE", headers: h });
 test.beforeAll(cleanup);
