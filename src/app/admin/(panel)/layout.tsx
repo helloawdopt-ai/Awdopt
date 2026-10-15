@@ -33,6 +33,7 @@ export default async function PanelLayout({ children }: { children: ReactNode })
         </NavLink>
         <NavLink href="/admin/adopters">Adopters</NavLink>
         <NavLink href="/admin/enquiries">Enquiries</NavLink>
+        <NavLink href="/admin/weights">Match weights</NavLink>
         <div className="ml-auto flex flex-col text-xs leading-[1.4] text-muted lg:mt-auto lg:ml-0">
           <span>{email} · 2-step verified</span>
           <form action={signOut}>

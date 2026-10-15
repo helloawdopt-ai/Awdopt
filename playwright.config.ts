@@ -9,7 +9,16 @@ export default defineConfig({
   fullyParallel: true,
   reporter: [["list"]],
   use: { baseURL: process.env.E2E_BASE_URL ?? `http://localhost:${PORT}` },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    { name: "chromium", use: { ...devices["Desktop Chrome"] }, testIgnore: "**/admin-weights.e2e.ts" },
+    // Changes the shared weights and constraints, so it runs alone, after everything that scores.
+    {
+      name: "weights",
+      use: { ...devices["Desktop Chrome"] },
+      testMatch: "**/admin-weights.e2e.ts",
+      dependencies: ["chromium"],
+    },
+  ],
   // Production build, so headers and CSP match what Vercel serves.
   webServer: process.env.E2E_BASE_URL
     ? undefined
