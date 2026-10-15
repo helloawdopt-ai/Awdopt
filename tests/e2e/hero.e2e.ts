@@ -12,8 +12,14 @@ for (const [width, height] of [
     await page.goto("/");
     const hero = page.locator("[data-hero]");
     await expect(hero).toHaveAttribute("data-hero", "3d", { timeout: 20_000 });
-    expect(Number(await hero.getAttribute("data-draw-calls"))).toBeLessThan(30);
-    expect(Number(await hero.getAttribute("data-triangles"))).toBeLessThan(60_000);
+    // The scene writes its first-frame stats on the stage element inside the hero.
+    const stage = hero.locator("[data-draw-calls]");
+    const calls = Number(await stage.getAttribute("data-draw-calls"));
+    const triangles = Number(await stage.getAttribute("data-triangles"));
+    expect(calls).toBeGreaterThan(0);
+    expect(calls).toBeLessThan(30);
+    expect(triangles).toBeGreaterThan(0);
+    expect(triangles).toBeLessThan(60_000);
     await expect(hero.locator("canvas")).toBeVisible();
     await page.waitForTimeout(700); // cross-fade
     await page.screenshot({ path: `docs/private/reviews/M2/hero-3d-${width}.png` });

@@ -1,6 +1,6 @@
 // First-load JS per route, brotli (the JS budget's unit). Excludes noModule polyfills, which modern
 // browsers never download. "shared" = chunks every given route loads (framework baseline); "own" =
-// the rest, checked against per-route budgets (docs: M2 decision). Pass at least two routes.
+// the rest, checked against per-route budgets (docs: M2 and M3 decisions). Pass at least two routes.
 // Usage: npm run build && npm run start, then: node scripts/js-size.mjs / /dogs /dogs/some-slug
 import { brotliCompressSync, gzipSync } from "node:zlib";
 
@@ -8,6 +8,9 @@ const base = process.env.BASE_URL ?? "http://localhost:3000";
 const SHARED_KB = 110.2; // M1 framework baseline (108.2KB) + 2KB allowance
 const OWN_KB = [
   [/^\/list/, 35],
+  [/^\/match/, 30],
+  [/^\/r\/[^/]+\/[^/]+\/interested/, 28],
+  [/^\/r\//, 8],
   [/^\/admin/, 15],
   [/^\/dogs\/./, 8],
   [/^\/dogs/, 12],

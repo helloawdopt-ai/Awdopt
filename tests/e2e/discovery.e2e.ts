@@ -115,7 +115,7 @@ test("profile: fields, Not known yet, video link, CTA", async ({ page }) => {
   await expect(cats).toContainText("Not known yet");
   await expect(cats).toHaveCSS("border-top-style", "dashed");
   await page.getByRole("link", { name: "See if we match" }).click();
-  await expect(page).toHaveURL(/\/match$/);
+  await expect(page).toHaveURL(/\/match\/basic$/);
 });
 
 test("profile hides pending, adopted and removed dogs", async ({ page }) => {

@@ -56,8 +56,16 @@
   transition-timing-function: ease-out;
 }
 
-/* Poster fallback for the 3D hero: a gentle bob (motion-safe only). */
+/* Poster fallback for the 3D hero: a gentle bob (motion-safe only).
+   Matching screen: category ticks pop in one by one (DESIGN.md §9, 120ms apart). */
 @theme {
+  --animate-tick: tick 180ms ease-out both;
+  @keyframes tick {
+    from {
+      opacity: 0;
+      scale: 0.6;
+    }
+  }
   --animate-bob: bob 4.5s ease-in-out infinite;
   @keyframes bob {
     0%,

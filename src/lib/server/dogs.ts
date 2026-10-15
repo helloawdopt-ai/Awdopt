@@ -88,6 +88,9 @@ const CACHE = { tags: ["dogs"], revalidate: 300 };
 /** A page of approved dogs, cached under the "dogs" tag. */
 export const listDogs = unstable_cache(fetchDogs, ["dogs-list"], CACHE);
 
+/** Shape check before a slug reaches a query or a cache key (matches the DB CHECK). */
+export const isSlug = (s: string) => s.length <= 80 && /^[a-z0-9]+(-[a-z0-9]+)*$/.test(s);
+
 export const getDog = unstable_cache(
   async (slug: string) => {
     const { data, error } = await service().rpc("public_dogs", undefined, { get: true }).eq("slug", slug).maybeSingle();
