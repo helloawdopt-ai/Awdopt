@@ -27,7 +27,7 @@ export default function Page() {
       <main className="flex flex-col gap-8 pt-6 text-[15px] leading-normal [&_li]:ml-5 [&_li]:list-disc [&_ul]:flex [&_ul]:flex-col [&_ul]:gap-1.5">
         <div className="flex flex-col gap-2.5">
           <h1 className="font-display text-[28px] leading-[1.1] font-extrabold tracking-[-0.035em]">Privacy notice</h1>
-          <p className="text-muted">Last updated 12 October 2026</p>
+          <p className="text-muted">Last updated 15 October 2026</p>
           <p>
             AWDOPT helps people in Mumbai find a dog that fits their life. This notice explains what we collect, why,
             who can see it, and how to ask us to change or delete it.
@@ -80,6 +80,11 @@ export default function Page() {
             <li>
               Your results are on a private link. Anyone with the link can see your matches, so keep it to yourself. The
               link never shows your contact details, and it stops working after 90 days.
+            </li>
+            <li>
+              When you say you&rsquo;re interested in a dog, our team keeps a note of how it is going (for example, a
+              meeting is arranged or the dog is adopted) and, if it doesn&rsquo;t work out, a short reason. Only the
+              team sees these notes.
             </li>
           </ul>
         </Section>
