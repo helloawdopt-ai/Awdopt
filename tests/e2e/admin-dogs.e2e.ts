@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import {
   captureAction,
+  checkAdminPage,
   countRows,
   deleteListings,
   deleteUsers,
@@ -8,12 +9,10 @@ import {
   dogStatus,
   listObjects,
   makeUser,
-  noOverflow,
   pendingListing,
   replayWithoutAal2,
   sb,
   signInWithMfa,
-  smallTargets,
 } from "./admin-helpers";
 
 // Admin dog management (scope #12): overview counts, all dogs, edit, mark adopted, remove.
@@ -29,8 +28,7 @@ let admin: { email: string; password: string };
 let adminNoMfa: { email: string; password: string };
 
 const slugOf = async (id: string) => (await sb<{ slug: string }[]>(`/rest/v1/dogs?id=eq.${id}&select=slug`))[0]!.slug;
-const shot = (page: Page, name: string) =>
-  page.screenshot({ path: `docs/private/reviews/M4/${name}.png`, fullPage: true });
+const shot = (page: Page, name: string) => page.screenshot({ path: `screenshots/M4/${name}.png`, fullPage: true });
 
 test.beforeAll(async () => {
   await deleteListings(PREFIX);
@@ -182,19 +180,12 @@ test("admin: overview counts, all dogs, edit, mark adopted, remove", async ({ br
   await expect(page.getByText(`${PREFIX} Adopt`)).toHaveCount(0);
   await expect(page.getByText(`${PREFIX} Remove`)).toHaveCount(0);
 
-  // 390px: nothing overflows the page, every control is at least 44px.
-  await page.setViewportSize({ width: 390, height: 844 });
+  // 360–1440: headers, no page overflow, 44px controls on phones and tablets, screenshots.
   for (const [path, name] of [
-    ["/admin", "admin-overview-390"],
-    ["/admin/dogs", "admin-dogs-390"],
-    [`/admin/dogs/${edit.id}`, "admin-dog-390"],
-    [`/admin/dogs/${edit.id}/edit`, "admin-edit-390"],
-  ]) {
-    const res = await page.goto(path!);
-    expect(res?.headers()["x-robots-tag"], path).toBe("noindex");
-    expect(res?.headers()["cache-control"], path).toContain("no-store");
-    expect(await noOverflow(page), path).toBeLessThanOrEqual(0);
-    expect(await smallTargets(page), path).toEqual([]);
-    await shot(page, name!);
-  }
+    ["/admin", "admin-overview"],
+    ["/admin/dogs", "admin-dogs"],
+    [`/admin/dogs/${edit.id}`, "admin-dog"],
+    [`/admin/dogs/${edit.id}/edit`, "admin-edit"],
+  ] as const)
+    await checkAdminPage(page, path, name);
 });

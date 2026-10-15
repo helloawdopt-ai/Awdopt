@@ -14,19 +14,22 @@ type Props = {
   children: ReactNode;
 };
 
-// Native <dialog>: showModal() makes the page inert, Esc closes, and focus returns to the trigger.
+// Native <dialog>: showModal() makes the page inert, Esc closes, and focus returns to the trigger
+// (set explicitly on close: Safari never focuses a tapped button, so it has nothing to return to).
 // Tapping the scrim closes it too. Slides up 220ms (DESIGN.md §9).
 export function BottomSheet({ title, trigger, triggerClassName, footer, children }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const titleId = useId();
   return (
     <>
-      <button type="button" className={triggerClassName} onClick={() => ref.current?.showModal()}>
+      <button ref={triggerRef} type="button" className={triggerClassName} onClick={() => ref.current?.showModal()}>
         {trigger}
       </button>
       <dialog
         ref={ref}
         aria-labelledby={titleId}
+        onClose={() => triggerRef.current?.focus()}
         onClick={(e) => e.target === ref.current && ref.current.close()}
         className={cx(
           "fixed inset-x-0 top-auto bottom-0 mx-auto m-0 h-auto max-h-[92dvh] w-full max-w-[640px] overflow-hidden p-0 text-ink",

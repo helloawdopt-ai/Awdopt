@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AdminTable } from "@/components/ui/AdminTable";
+import { AdminTable, adminLink } from "@/components/ui/AdminTable";
 import { EmptyState, ErrorState } from "@/components/ui/States";
 import { linkState, optionLabel, submittedLabel } from "@/lib/admin-format";
 import { EXPERIENCE, HOME_TYPES } from "@/lib/questionnaire";
@@ -43,11 +43,7 @@ export default async function Page() {
               {adopters.map((a) => (
                 <tr key={a.id}>
                   <td>
-                    <Link
-                      href={`/admin/adopters/${a.id}`}
-                      prefetch={false}
-                      className="inline-flex min-h-11 items-center font-extrabold lg:min-h-0"
-                    >
+                    <Link href={`/admin/adopters/${a.id}`} prefetch={false} className={adminLink}>
                       {a.name}
                     </Link>
                   </td>

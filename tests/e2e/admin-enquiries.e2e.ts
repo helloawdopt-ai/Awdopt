@@ -2,17 +2,16 @@ import { randomBytes } from "node:crypto";
 import { expect, test } from "@playwright/test";
 import {
   captureAction,
+  checkAdminPage,
   deleteListings,
   deleteUsers,
   devReady,
   dogStatus,
   makeUser,
-  noOverflow,
   pendingListing,
   replayWithoutAal2,
   sb,
   signInWithMfa,
-  smallTargets,
 } from "./admin-helpers";
 
 // Enquiries and outcome tracking (scope #12, #13): the 8 statuses, the reason field, the
@@ -145,7 +144,7 @@ test("admin: 8 statuses, reason, reopen refused, Adopted takes the dog off Find 
     "Adoption unsuccessful",
     "Follow-up required",
   ]);
-  await page.screenshot({ path: "docs/private/reviews/M4/admin-enquiries-1280.png", fullPage: true });
+  await page.screenshot({ path: "screenshots/M4/admin-enquiries-1280.png", fullPage: true });
 
   // Replayed without an aal2 admin, the status change does nothing.
   await status.selectOption("meeting");
@@ -197,17 +196,6 @@ test("admin: 8 statuses, reason, reopen refused, Adopted takes the dog off Find 
   await page.goto(`/dogs/${dog.slug}`);
   await expect(page.getByRole("heading", { level: 1, name: new RegExp(PREFIX) })).toHaveCount(0);
 
-  // 390px: the table scrolls inside its card, the page doesn't; controls are 44px.
-  await page.setViewportSize({ width: 390, height: 844 });
-  for (const [path, name] of [
-    ["/admin/enquiries", "admin-enquiries-390"],
-    ["/admin", "admin-overview-enquiries-390"],
-  ] as const) {
-    const res = await page.goto(path);
-    expect(res?.headers()["x-robots-tag"], path).toBe("noindex");
-    expect(res?.headers()["cache-control"], path).toContain("no-store");
-    expect(await noOverflow(page), path).toBeLessThanOrEqual(0);
-    expect(await smallTargets(page), path).toEqual([]);
-    await page.screenshot({ path: `docs/private/reviews/M4/${name}.png`, fullPage: true });
-  }
+  // 360–1440: the table scrolls inside its card, the page doesn't; 44px controls on phones and tablets.
+  await checkAdminPage(page, "/admin/enquiries", "admin-enquiries");
 });

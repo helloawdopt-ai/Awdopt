@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { approveDog } from "@/app/admin/dog-actions";
-import { ENQUIRY_COLUMNS, EnquiryNotice, EnquiryTable } from "@/components/admin/EnquiryTable";
+import { ENQUIRY_COLUMNS, ENQUIRY_MESSAGES, EnquiryTable } from "@/components/admin/EnquiryTable";
+import { Notice } from "@/components/admin/Notice";
 import { AdminTable, adminButton } from "@/components/ui/AdminTable";
 import { StatusChip } from "@/components/ui/Chip";
 import { EmptyState, ErrorState } from "@/components/ui/States";
@@ -56,11 +57,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ d
         ))}
       </dl>
       <h2 className="text-[17px] font-extrabold">Listings waiting for approval</h2>
-      {done && done in NOTICES && (
-        <p role="status" className="rounded-[16px] border-2 border-ink bg-fresh px-3.5 py-2.5 text-sm font-bold">
-          {NOTICES[done as keyof typeof NOTICES]}
-        </p>
-      )}
+      <Notice messages={NOTICES} done={done} />
       {error ? (
         <ErrorState>We couldn&rsquo;t load the listings. Refresh the page to try again.</ErrorState>
       ) : !dogs.length ? (
@@ -120,7 +117,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ d
           All enquiries →
         </Link>
       </div>
-      <EnquiryNotice done={done} error={notice} />
+      <Notice messages={ENQUIRY_MESSAGES} done={done} error={notice} />
       {recent.error ? (
         <ErrorState>We couldn&rsquo;t load the enquiries. Refresh the page to try again.</ErrorState>
       ) : !recent.data.length ? (

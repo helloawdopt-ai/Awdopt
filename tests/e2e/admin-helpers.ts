@@ -190,3 +190,24 @@ export const smallTargets = (page: Page) =>
   );
 
 export const noOverflow = (page: Page) => page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+
+/**
+ * An admin page at 360, 390, 768 and 1440 (build rules: screenshots at those widths): private
+ * headers, no page-level horizontal scroll, 44px controls below 1024px, a full-page screenshot.
+ */
+export async function checkAdminPage(page: Page, path: string, name: string) {
+  for (const [width, height] of [
+    [360, 800],
+    [390, 844],
+    [768, 1024],
+    [1440, 900],
+  ] as const) {
+    await page.setViewportSize({ width, height });
+    const res = await page.goto(path);
+    expect(res?.headers()["x-robots-tag"], path).toBe("noindex");
+    expect(res?.headers()["cache-control"], path).toContain("no-store");
+    expect(await noOverflow(page), `${path} at ${width}`).toBeLessThanOrEqual(0);
+    if (width < 1024) expect(await smallTargets(page), `${path} at ${width}`).toEqual([]);
+    await page.screenshot({ path: `screenshots/M4/${name}-${width}.png`, fullPage: true });
+  }
+}

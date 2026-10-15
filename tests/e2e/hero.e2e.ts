@@ -22,7 +22,7 @@ for (const [width, height] of [
     expect(triangles).toBeLessThan(60_000);
     await expect(hero.locator("canvas")).toBeVisible();
     await page.waitForTimeout(700); // cross-fade
-    await page.screenshot({ path: `docs/private/reviews/M2/hero-3d-${width}.png` });
+    await page.screenshot({ path: `screenshots/M2/hero-3d-${width}.png` });
   });
 }
 
@@ -37,7 +37,7 @@ test("drag flips the polaroid to the match card, release settles it", async ({ p
   await page.mouse.down();
   await page.mouse.move(box.x + box.width * 0.3 + box.width * 0.45, y, { steps: 12 });
   await page.waitForTimeout(600);
-  await page.screenshot({ path: "docs/private/reviews/M2/hero-3d-flipped-1440.png" });
+  await page.screenshot({ path: "screenshots/M2/hero-3d-flipped-1440.png" });
   await page.mouse.up();
 });
 

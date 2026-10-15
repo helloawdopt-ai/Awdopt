@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { saveWeights } from "@/app/admin/weights-actions";
+import { Notice } from "@/components/admin/Notice";
 import { adminButton, adminSelect } from "@/components/ui/AdminTable";
 import { ErrorState } from "@/components/ui/States";
 import { CATEGORIES } from "@/lib/explanations";
@@ -38,7 +39,6 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ d
 
   const weight = new Map(weights.data.map((w) => [w.category, w.weight]));
   const total = weights.data.reduce((sum, w) => sum + w.weight, 0);
-  const key = notice ?? done;
 
   return (
     <>
@@ -48,14 +48,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ d
         50 is the same as 1 and 2). Changes apply at once to every results link. Enquiries keep the score and weights
         from when they were sent.
       </p>
-      {key && key in MESSAGES && (
-        <p
-          role={notice ? "alert" : "status"}
-          className={`rounded-[16px] border-2 border-ink px-3.5 py-2.5 text-sm font-bold ${notice ? "bg-surface" : "bg-fresh"}`}
-        >
-          {MESSAGES[key as keyof typeof MESSAGES]}
-        </p>
-      )}
+      <Notice messages={MESSAGES} done={done} error={notice} />
 
       <form action={saveWeights} className="flex max-w-[760px] flex-col gap-5">
         <fieldset className="flex flex-col gap-3 rounded-[16px] border-2 border-ink bg-surface p-4">

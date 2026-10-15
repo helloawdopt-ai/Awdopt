@@ -83,7 +83,7 @@ test("admin: TOTP set-up, queue, magic-byte check, approve, reject", async ({ br
 
   // First sign-in: a wrong code keeps the same QR; the right one gives aal2.
   await signIn(page, admin);
-  await page.screenshot({ path: "docs/private/reviews/M2/admin-mfa-start-1280.png" });
+  await page.screenshot({ path: "screenshots/M2/admin-mfa-start-1280.png" });
   await page.getByRole("button", { name: "Set up authenticator app" }).click();
   const secret = (await page.getByTestId("totp-secret").textContent())!.trim();
   await page.getByLabel("6-digit code").fill(totp(secret, 5));
@@ -96,10 +96,10 @@ test("admin: TOTP set-up, queue, magic-byte check, approve, reject", async ({ br
 
   const queue = page.getByRole("region", { name: "Listings waiting for approval" });
   for (const n of ["Approve", "Reject", "Fake"]) await expect(queue.getByText(`${PREFIX} ${n}`)).toBeVisible();
-  await page.screenshot({ path: "docs/private/reviews/M2/admin-queue-1280.png", fullPage: true });
+  await page.screenshot({ path: "screenshots/M2/admin-queue-1280.png", fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
-  await page.screenshot({ path: "docs/private/reviews/M2/admin-queue-390.png", fullPage: true });
+  await page.screenshot({ path: "screenshots/M2/admin-queue-390.png", fullPage: true });
   await page.setViewportSize({ width: 1280, height: 860 });
 
   // Capture the real approve request, block it, and replay it without an aal2 admin session.
@@ -121,7 +121,7 @@ test("admin: TOTP set-up, queue, magic-byte check, approve, reject", async ({ br
   await page.goto(`/admin/dogs/${approve.id}`);
   await expect(page.getByText("+910000000098")).toBeVisible();
   await expect(page.getByRole("img", { name: `Photo 1 of ${PREFIX} Approve` })).toBeVisible();
-  await page.screenshot({ path: "docs/private/reviews/M2/admin-review-1280.png", fullPage: true });
+  await page.screenshot({ path: "screenshots/M2/admin-review-1280.png", fullPage: true });
   await page.getByRole("button", { name: "Approve and publish" }).click();
   await expect(page.getByText("Listing approved. It's live on Find a Dog.")).toBeVisible();
   expect(await dogStatus(approve.id)).toBe("approved");
@@ -161,5 +161,5 @@ test("admin: TOTP set-up, queue, magic-byte check, approve, reject", async ({ br
 test("login page screenshot at 390px", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/admin/login");
-  await page.screenshot({ path: "docs/private/reviews/M2/admin-login-390.png" });
+  await page.screenshot({ path: "screenshots/M2/admin-login-390.png" });
 });

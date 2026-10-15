@@ -46,7 +46,7 @@ const photo = () =>
 
 async function shot(page: Page, name: string) {
   await page.evaluate(() => document.fonts.ready);
-  await page.screenshot({ path: `docs/private/reviews/M2/${name}.png`, fullPage: true });
+  await page.screenshot({ path: `screenshots/M2/${name}.png`, fullPage: true });
 }
 
 test("list a dog: 5 steps, photo pipeline, Turnstile, pending in the DB", async ({ page }) => {

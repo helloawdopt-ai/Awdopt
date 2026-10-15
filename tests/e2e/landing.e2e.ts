@@ -14,7 +14,7 @@ for (const [width, height] of WIDTHS) {
     await page.evaluate(() => document.fonts.ready);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(overflow).toBeLessThanOrEqual(0);
-    await page.screenshot({ path: `docs/private/reviews/M1/landing-${width}.png`, fullPage: true });
+    await page.screenshot({ path: `screenshots/M1/landing-${width}.png`, fullPage: true });
   });
 }
 

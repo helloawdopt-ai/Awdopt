@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { approveDog, markAdopted, rejectDog, removeDog } from "@/app/admin/dog-actions";
+import { ContactLinks } from "@/components/admin/ContactLinks";
+import { Notice } from "@/components/admin/Notice";
 import { adminButton } from "@/components/ui/AdminTable";
 import { StatusChip } from "@/components/ui/Chip";
 import { ErrorState } from "@/components/ui/States";
-import { DOG_STATUS, RELATIONSHIP_LABEL, dogTitle, submittedLabel, whatsApp } from "@/lib/admin-format";
+import { DOG_STATUS, RELATIONSHIP_LABEL, dogTitle, submittedLabel } from "@/lib/admin-format";
 import {
   ENERGY_LABEL,
   HANDLING_LABEL,
@@ -29,8 +31,6 @@ const NOTICES = {
   adopted: "Marked as adopted. The dog is no longer on Find a Dog or in anyone's results.",
   removed: "Listing removed and its photos deleted.",
 };
-// 44px tall below 1024px (DESIGN.md §16: admin controls), inline on desktop.
-const contactLink = "inline-flex min-h-11 min-w-11 items-center font-bold lg:min-h-0 lg:min-w-0";
 const yesNo = (v: boolean | null) => (v === null ? null : v ? "Yes" : "No");
 
 export default async function Page({
@@ -98,11 +98,7 @@ export default async function Page({
         <StatusChip tone={DOG_STATUS[dog.status].tone}>{DOG_STATUS[dog.status].label}</StatusChip>
         Submitted {submittedLabel(dog.created_at)}
       </p>
-      {done && done in NOTICES && (
-        <p role="status" className="rounded-[16px] border-2 border-ink bg-fresh px-3.5 py-2.5 text-sm font-bold">
-          {NOTICES[done as keyof typeof NOTICES]}
-        </p>
-      )}
+      <Notice messages={NOTICES} done={done} />
       {error && error in ERRORS && <ErrorState>{ERRORS[error as keyof typeof ERRORS]}</ErrorState>}
 
       <section className="flex flex-col gap-2">
@@ -135,15 +131,10 @@ export default async function Page({
             <dd>{lister.name}</dd>
             <dt className="font-bold">Relationship</dt>
             <dd>{RELATIONSHIP_LABEL[lister.relationship]}</dd>
-            <dt className="font-bold">Phone</dt>
+            <dt className="flex items-center font-bold sm:min-h-11 lg:min-h-0">Phone</dt>
             <dd className="flex flex-wrap items-center gap-x-3">
               {lister.phone}
-              <a href={`tel:${lister.phone}`} className={contactLink}>
-                Call
-              </a>
-              <a href={whatsApp(lister.phone)} target="_blank" rel="noopener noreferrer" className={contactLink}>
-                WhatsApp
-              </a>
+              <ContactLinks phone={lister.phone} />
             </dd>
             <dt className="font-bold">Email</dt>
             <dd>{lister.email ?? "—"}</dd>

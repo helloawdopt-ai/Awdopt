@@ -18,6 +18,11 @@ export default defineConfig({
       testMatch: "**/admin-weights.e2e.ts",
       dependencies: ["chromium"],
     },
+    // Safari's engine on an iPhone-sized screen: `E2E_WEBKIT=1 npm run e2e -- --project=webkit`.
+    // A stand-in for real iPhone checks, not a replacement (needs `npx playwright install webkit`).
+    ...(process.env.E2E_WEBKIT
+      ? [{ name: "webkit", use: { ...devices["iPhone 14"] }, testIgnore: "**/admin-weights.e2e.ts" }]
+      : []),
   ],
   // Production build, so headers and CSP match what Vercel serves.
   webServer: process.env.E2E_BASE_URL

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AdminTable } from "@/components/ui/AdminTable";
+import { AdminTable, adminLink } from "@/components/ui/AdminTable";
 import { StatusChip } from "@/components/ui/Chip";
 import { EmptyState, ErrorState } from "@/components/ui/States";
 import { DOG_STATUS, dogTitle, submittedLabel } from "@/lib/admin-format";
@@ -40,11 +40,7 @@ export default async function Page() {
               {dogs.map((d) => (
                 <tr key={d.id}>
                   <td>
-                    <Link
-                      href={`/admin/dogs/${d.id}`}
-                      prefetch={false}
-                      className="inline-flex min-h-11 items-center font-extrabold lg:min-h-0"
-                    >
+                    <Link href={`/admin/dogs/${d.id}`} prefetch={false} className={adminLink}>
                       {dogTitle(d)}
                     </Link>
                   </td>

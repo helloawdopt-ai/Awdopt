@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { ENQUIRY_COLUMNS, EnquiryNotice, EnquiryTable } from "@/components/admin/EnquiryTable";
+import { ENQUIRY_COLUMNS, ENQUIRY_MESSAGES, EnquiryTable } from "@/components/admin/EnquiryTable";
+import { Notice } from "@/components/admin/Notice";
 import { EmptyState, ErrorState } from "@/components/ui/States";
 import { requireAdmin } from "@/lib/server/auth";
 
@@ -20,7 +21,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ d
         Match is the score when the enquiry was sent. Choose a status, add a reason if it didn&rsquo;t work out, then
         Save. &ldquo;Adopted&rdquo; also takes the dog off Find a Dog.
       </p>
-      <EnquiryNotice done={done} error={notice} />
+      <Notice messages={ENQUIRY_MESSAGES} done={done} error={notice} />
       {error ? (
         <ErrorState>We couldn&rsquo;t load the enquiries. Refresh the page to try again.</ErrorState>
       ) : !enquiries.length ? (

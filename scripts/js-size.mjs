@@ -5,6 +5,8 @@
 import { brotliCompressSync, gzipSync } from "node:zlib";
 
 const base = process.env.BASE_URL ?? "http://localhost:3000";
+// Signed-in pages (admin): COOKIE="<the browser's Cookie header>" node scripts/js-size.mjs /admin /admin/dogs
+const page = process.env.COOKIE ? { headers: { cookie: process.env.COOKIE }, redirect: "manual" } : {};
 const SHARED_KB = 110.2; // M1 framework baseline (108.2KB) + 2KB allowance
 const OWN_KB = [
   [/^\/list/, 35],
@@ -26,7 +28,7 @@ const get = async (s) => cache.get(s) ?? cache.set(s, Buffer.from(await (await f
 const routes = process.argv.slice(2);
 const chunks = {};
 for (const route of routes) {
-  const html = await (await fetch(base + route)).text();
+  const html = await (await fetch(base + route, page)).text();
   chunks[route] = [
     ...new Set(
       [...html.matchAll(/<script\b([^>]*)>/g)]

@@ -31,15 +31,6 @@ export const DOG_STATUS = {
 /** "Matches" on the overview: enquiries that reached a meeting (there's no status history). */
 export const MATCH_STATUSES = ["meeting", "adoption_in_progress", "adopted", "adoption_unsuccessful"] as const;
 
-/** "12 Oct 2026", in Mumbai time. */
-export const dateLabel = (iso: string) =>
-  new Date(iso).toLocaleDateString("en-IN", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    timeZone: "Asia/Kolkata",
-  });
-
 /** Option label for a stored value (questionnaire options), or the value itself. */
 export const optionLabel = (options: readonly { value: string; label: string }[], v: string) =>
   options.find((o) => o.value === v)?.label ?? v;
@@ -64,6 +55,8 @@ export const pct = (n: number) => `${Math.round(n * 100)}%`;
 
 /** Results-link state for admin tables: "Expired" or "Until 12 Oct 2026". */
 export const linkState = (expiresIso: string) =>
-  Date.parse(expiresIso) < Date.now() ? "Expired" : `Until ${dateLabel(expiresIso)}`;
+  Date.parse(expiresIso) < Date.now()
+    ? "Expired"
+    : `Until ${new Date(expiresIso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Kolkata" })}`;
 
 export const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;

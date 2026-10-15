@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { AdminTable } from "@/components/ui/AdminTable";
+import { ContactLinks } from "@/components/admin/ContactLinks";
+import { AdminTable, adminLink } from "@/components/ui/AdminTable";
 import { StatusChip } from "@/components/ui/Chip";
 import { ErrorState } from "@/components/ui/States";
-import { ENQUIRY_STATUS_LABEL, linkState, optionLabel, pct, submittedLabel, whatsApp } from "@/lib/admin-format";
+import { ENQUIRY_STATUS_LABEL, linkState, optionLabel, pct, submittedLabel } from "@/lib/admin-format";
 import {
   ACTIVITY,
   DAILY_TIME,
@@ -25,7 +26,6 @@ export const metadata: Metadata = { title: "Adopter", robots: { index: false } }
 const yes = (v: boolean) => (v ? "Yes" : "No");
 const list = (options: readonly { value: string; label: string }[], values: string[]) =>
   values.length ? values.map((v) => optionLabel(options, v)).join(", ") : "No preference";
-const contactLink = "inline-flex min-h-11 min-w-11 items-center font-bold lg:min-h-0 lg:min-w-0";
 
 // Admin only. The ranking is score_dogs_for_adopter on the admin's own session (RLS), the same
 // function the adopter's results link uses, so this is what they would see right now.
@@ -114,15 +114,10 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
       <section className="flex flex-col gap-2 rounded-[16px] border-2 border-ink bg-surface p-4">
         <h2 className="text-[17px] font-extrabold">Contact (never public)</h2>
         <dl className="grid gap-x-6 gap-y-1 text-sm sm:grid-cols-[max-content_1fr]">
-          <dt className="font-bold">Phone</dt>
+          <dt className="flex items-center font-bold sm:min-h-11 lg:min-h-0">Phone</dt>
           <dd className="flex flex-wrap items-center gap-x-3">
             {a.phone}
-            <a href={`tel:${a.phone}`} className={contactLink}>
-              Call
-            </a>
-            <a href={whatsApp(a.phone)} target="_blank" rel="noopener noreferrer" className={contactLink}>
-              WhatsApp
-            </a>
+            <ContactLinks phone={a.phone} />
           </dd>
           <dt className="font-bold">Email</dt>
           <dd>{a.email ?? "—"}</dd>
@@ -238,11 +233,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 
 function DogLink({ id, name }: { id: string; name?: string }) {
   return (
-    <Link
-      href={`/admin/dogs/${id}`}
-      prefetch={false}
-      className="inline-flex min-h-11 items-center font-extrabold whitespace-nowrap lg:min-h-0"
-    >
+    <Link href={`/admin/dogs/${id}`} prefetch={false} className={`${adminLink} whitespace-nowrap`}>
       {name ?? "Unknown dog"}
     </Link>
   );

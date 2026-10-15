@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { deleteUsers, devReady, makeUser, noOverflow, sb, signInWithMfa, smallTargets } from "./admin-helpers";
+import { checkAdminPage, deleteUsers, devReady, makeUser, sb, signInWithMfa } from "./admin-helpers";
 
 // Admin adopter view (scope #12): answers, contact, enquiries and the current ranking, which must
 // be exactly what score_dogs_for_adopter returns. Read-only: uses the two seeded fake adopters.
@@ -32,7 +32,7 @@ test("admin: adopters list, answers, contact, enquiries and current recommendati
   const table = page.getByRole("region", { name: "All adopters" });
   await expect(table.getByRole("row", { name: /Sample Adopter One .*Until/ })).toBeVisible();
   await expect(table.getByRole("row", { name: /Sample Adopter Two .*Expired/ })).toBeVisible();
-  await page.screenshot({ path: "docs/private/reviews/M4/admin-adopters-1280.png", fullPage: true });
+  await page.screenshot({ path: "screenshots/M4/admin-adopters-1280.png", fullPage: true });
 
   await table.getByRole("link", { name: "Sample Adopter One" }).click();
   await expect(page).toHaveURL(new RegExp(`/admin/adopters/${ONE}$`));
@@ -74,7 +74,7 @@ test("admin: adopters list, answers, contact, enquiries and current recommendati
     expect(await recs.getByText("Left out").count()).toBe(rows.filter((r) => r.rank === null).length);
   }).toPass({ timeout: 20_000 });
   await expect(recs.getByText(/would be alone longer|large space/).first()).toBeVisible();
-  await page.screenshot({ path: "docs/private/reviews/M4/admin-adopter-1280.png", fullPage: true });
+  await page.screenshot({ path: "screenshots/M4/admin-adopter-1280.png", fullPage: true });
 
   // The results-link hash never reaches the page.
   const html = await page.content();
@@ -85,16 +85,7 @@ test("admin: adopters list, answers, contact, enquiries and current recommendati
   await expect(page.getByText(/Results link: Expired/)).toBeVisible();
   await expect(page.getByText("No enquiries yet.")).toBeVisible();
 
-  await page.setViewportSize({ width: 390, height: 844 });
-  for (const [path, name] of [
-    ["/admin/adopters", "admin-adopters-390"],
-    [`/admin/adopters/${ONE}`, "admin-adopter-390"],
-  ] as const) {
-    const res = await page.goto(path);
-    expect(res?.headers()["x-robots-tag"], path).toBe("noindex");
-    expect(res?.headers()["cache-control"], path).toContain("no-store");
-    expect(await noOverflow(page), path).toBeLessThanOrEqual(0);
-    expect(await smallTargets(page), path).toEqual([]);
-    await page.screenshot({ path: `docs/private/reviews/M4/${name}.png`, fullPage: true });
-  }
+  // 360–1440: headers, no page overflow, 44px controls on phones and tablets, screenshots.
+  await checkAdminPage(page, "/admin/adopters", "admin-adopters");
+  await checkAdminPage(page, `/admin/adopters/${ONE}`, "admin-adopter");
 });

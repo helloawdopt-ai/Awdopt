@@ -1,14 +1,13 @@
 import { expect, test } from "@playwright/test";
 import {
   captureAction,
+  checkAdminPage,
   deleteUsers,
   devReady,
   makeUser,
-  noOverflow,
   replayWithoutAal2,
   sb,
   signInWithMfa,
-  smallTargets,
 } from "./admin-helpers";
 
 // Weights editor and hard-constraint switches (scope #7: weights editable by admin). Changes the
@@ -76,7 +75,7 @@ test("admin: edit weights (re-ranks), refuse all zero, switch a constraint off",
   await expect(page).toHaveURL(/\/admin\/weights$/);
   await expect(page.getByRole("spinbutton", { name: /^Lifestyle \/ activity/ })).toHaveValue("25");
   await expect(page.getByText("25%", { exact: true })).toHaveCount(1); // lifestyle's share
-  await page.screenshot({ path: "docs/private/reviews/M4/admin-weights-1280.png", fullPage: true });
+  await page.screenshot({ path: "screenshots/M4/admin-weights-1280.png", fullPage: true });
 
   // Replayed without an aal2 admin, a save changes nothing.
   await page.getByRole("spinbutton", { name: /^Size preference/ }).fill("90");
@@ -133,12 +132,6 @@ test("admin: edit weights (re-ranks), refuse all zero, switch a constraint off",
   const recs = page.getByRole("region", { name: "Current recommendations" });
   await expect(recs.getByText(/would be alone longer/)).toHaveCount(0);
 
-  // 390px: no page overflow, every control is 44px.
-  await page.setViewportSize({ width: 390, height: 844 });
-  const res = await page.goto("/admin/weights");
-  expect(res?.headers()["x-robots-tag"]).toBe("noindex");
-  expect(res?.headers()["cache-control"]).toContain("no-store");
-  expect(await noOverflow(page)).toBeLessThanOrEqual(0);
-  expect(await smallTargets(page)).toEqual([]);
-  await page.screenshot({ path: "docs/private/reviews/M4/admin-weights-390.png", fullPage: true });
+  // 360–1440: headers, no page overflow, 44px controls on phones and tablets, screenshots.
+  await checkAdminPage(page, "/admin/weights", "admin-weights");
 });

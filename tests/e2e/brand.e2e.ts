@@ -34,7 +34,7 @@ for (const [width, height] of WIDTHS) {
     await page.evaluate(() => document.fonts.ready);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(overflow).toBeLessThanOrEqual(0);
-    await page.screenshot({ path: `docs/private/reviews/step0/brand-${width}.png`, fullPage: true });
+    await page.screenshot({ path: `screenshots/step0/brand-${width}.png`, fullPage: true });
   });
 }
 
@@ -80,7 +80,8 @@ test("keyboard focus is never hidden under the sticky bar", async ({ page }) => 
     const hidden = await page.evaluate(() => {
       const el = document.activeElement as HTMLElement | null;
       const bar = document.querySelector<HTMLElement>(".sticky.bottom-0");
-      if (!el || !bar || bar.contains(el)) return false;
+      // Safari tabs through form controls only, then to <body>: that is no focus target.
+      if (!el || el === document.body || !bar || bar.contains(el)) return false;
       return el.getBoundingClientRect().bottom > bar.getBoundingClientRect().top;
     });
     expect(hidden).toBe(false);
