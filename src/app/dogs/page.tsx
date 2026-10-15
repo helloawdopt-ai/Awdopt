@@ -75,7 +75,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
               </h1>
               <p className="text-sm text-muted">
                 {n} {n === 1 ? "dog" : "dogs"}
-                {active ? " match your filters" : ""} · Mumbai
+                {active ? ` ${n === 1 ? "matches" : "match"} your filters` : ""} · Mumbai
               </p>
             </div>
 

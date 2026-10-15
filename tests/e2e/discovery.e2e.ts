@@ -94,7 +94,7 @@ test("desktop: sidebar filters by area and age", async ({ page }) => {
   await side.getByRole("button", { name: "Show dogs" }).click();
   await expect(page).toHaveURL(/area=western&age=puppy/);
   await expect(page.getByRole("main").getByRole("heading", { level: 2, name: "Sample Pepper" })).toBeVisible();
-  await expect(page.getByText("1 dog match your filters · Mumbai")).toBeVisible();
+  await expect(page.getByText("1 dog matches your filters · Mumbai")).toBeVisible();
 });
 
 test("no matches shows the empty state", async ({ page }) => {
