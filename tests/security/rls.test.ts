@@ -29,6 +29,20 @@ const TABLES = [
   "rate_limits",
 ];
 const PENDING_DOG = "00000000-0000-4000-b000-000000000007";
+const ADOPTER = { p_adopter_id: "00000000-0000-4000-c000-000000000001" };
+const DEFAULT_WEIGHTS = {
+  lifestyle: 25,
+  living: 20,
+  time: 15,
+  household: 10,
+  experience: 10,
+  size: 10,
+  age: 5,
+  special_needs: 5,
+};
+const weightRows = (w: Record<string, number>) =>
+  JSON.stringify(Object.entries(w).map(([category, weight]) => ({ category, weight })));
+const upsert = { Prefer: "resolution=merge-duplicates,return=representation" };
 
 const headers = (token?: string, key = publishable): Record<string, string> => ({
   apikey: key,
@@ -197,10 +211,15 @@ describe.each([0, 1, 2])("denied caller #%i", (i) => {
   it("cannot call the server-only matching functions", async () => {
     const [, token] = caller();
     const h = headers(token);
-    const adopter = { p_adopter_id: "00000000-0000-4000-c000-000000000001" };
-    expect(
-      (await rest("rpc/score_dogs_for_adopter", { method: "POST", headers: h, body: JSON.stringify(adopter) })).ok,
-    ).toBe(false);
+    // Signed-in callers may execute the ranking (admin adopter view, SECURITY INVOKER), but RLS
+    // hides every adopter and dog from them, so they get nothing; anon can't execute it at all.
+    const ranked = await rest("rpc/score_dogs_for_adopter", {
+      method: "POST",
+      headers: h,
+      body: JSON.stringify(ADOPTER),
+    });
+    expect(denied(ranked)).toBe(true);
+    if (!token) expect(ranked.status).toBe(401);
     const link = { p_token_hash: "\\x" + "00".repeat(32) };
     expect((await rest("rpc/results_for_token", { method: "POST", headers: h, body: JSON.stringify(link) })).ok).toBe(
       false,
@@ -247,6 +266,15 @@ describe.each([0, 1, 2])("denied caller #%i", (i) => {
     expect(
       denied(await rest("match_weights?category=eq.lifestyle", { method: "PATCH", headers: h, body: '{"weight":99}' })),
     ).toBe(true);
+    expect(
+      denied(
+        await rest("match_weights", {
+          method: "POST",
+          headers: { ...h, ...upsert },
+          body: weightRows({ ...DEFAULT_WEIGHTS, lifestyle: 99 }),
+        }),
+      ),
+    ).toBe(true);
     expect(denied(await rest("enquiries?id=not.is.null", { method: "DELETE", headers: h }))).toBe(true);
     const check = await rest("match_weights?category=eq.lifestyle&select=weight", { headers: service() });
     expect(check.rows).toEqual([{ weight: 25 }]);
@@ -265,6 +293,25 @@ describe("allowed paths", () => {
   it("an aal2 admin can read pending uploads", async () => {
     const r = await storage(`object/authenticated/listing-uploads/${uploadPath}`, { headers: headers(adminAal2) });
     expect(r.ok).toBe(true);
+  });
+
+  it("an aal2 admin can rank an adopter's dogs (adopter view)", async () => {
+    const r = await rest("rpc/score_dogs_for_adopter", {
+      method: "POST",
+      headers: headers(adminAal2),
+      body: JSON.stringify(ADOPTER),
+    });
+    expect(r.ok).toBe(true);
+    expect(r.rows?.length).toBe(6);
+  });
+
+  it("an aal2 admin saves all weights in one upsert; all zero is refused", async () => {
+    const h = { ...headers(adminAal2), ...upsert };
+    const zero = Object.fromEntries(Object.keys(DEFAULT_WEIGHTS).map((k) => [k, 0]));
+    expect((await rest("match_weights", { method: "POST", headers: h, body: weightRows(zero) })).ok).toBe(false);
+    const saved = await rest("match_weights", { method: "POST", headers: h, body: weightRows(DEFAULT_WEIGHTS) });
+    expect(saved.ok && saved.rows?.length).toBe(8);
+    expect((await rest("match_weights?select=category", { headers: service() })).rows?.length).toBe(8);
   });
 
   it("an aal2 admin still cannot touch rate_limits", async () => {
