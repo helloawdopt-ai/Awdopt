@@ -65,3 +65,5 @@ export const pct = (n: number) => `${Math.round(n * 100)}%`;
 /** Results-link state for admin tables: "Expired" or "Until 12 Oct 2026". */
 export const linkState = (expiresIso: string) =>
   Date.parse(expiresIso) < Date.now() ? "Expired" : `Until ${dateLabel(expiresIso)}`;
+
+export const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;

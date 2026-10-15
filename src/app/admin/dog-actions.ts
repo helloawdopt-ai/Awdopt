@@ -3,10 +3,9 @@
 import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import * as z from "zod/mini";
+import { UUID } from "@/lib/admin-format";
 import { listingSchema, toDog } from "@/lib/listing-schema";
 import { requireAdmin } from "@/lib/server/auth";
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 // Real file signatures, so a renamed file can't slip through (the bucket only checks the declared type).
 const MAGIC: Record<string, (b: Uint8Array) => boolean> = {

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { approveDog } from "@/app/admin/dog-actions";
+import { ENQUIRY_COLUMNS, EnquiryNotice, EnquiryTable } from "@/components/admin/EnquiryTable";
 import { AdminTable, adminButton } from "@/components/ui/AdminTable";
 import { StatusChip } from "@/components/ui/Chip";
 import { EmptyState, ErrorState } from "@/components/ui/States";
@@ -14,13 +15,13 @@ const NOTICES = {
   rejected: "Listing rejected and its photos deleted.",
 };
 
-export default async function Page({ searchParams }: { searchParams: Promise<{ done?: string }> }) {
+export default async function Page({ searchParams }: { searchParams: Promise<{ done?: string; error?: string }> }) {
   const { supabase } = await requireAdmin();
-  const { done } = await searchParams;
+  const { done, error: notice } = await searchParams;
   const head = { count: "exact", head: true } as const;
   const dogCount = (status: "approved" | "pending" | "adopted") =>
     supabase.from("dogs").select("id", head).eq("status", status);
-  const [live, pending, adopted, adopters, interests, matches, { data: dogs, error }] = await Promise.all([
+  const [live, pending, adopted, adopters, interests, matches, { data: dogs, error }, recent] = await Promise.all([
     dogCount("approved"),
     dogCount("pending"),
     dogCount("adopted"),
@@ -32,6 +33,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ d
       .select("id, name, age_months, breed, locality, urgent, created_at, listers(relationship)")
       .eq("status", "pending")
       .order("created_at"),
+    supabase.from("enquiries").select(ENQUIRY_COLUMNS).order("created_at", { ascending: false }).limit(5),
   ]);
   const tiles: [string, number | null, string][] = [
     ["Dogs", live.count, `live · ${pending.count ?? "—"} waiting`],
@@ -111,6 +113,20 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ d
             </tbody>
           </table>
         </AdminTable>
+      )}
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 className="text-[17px] font-extrabold">Recent enquiries</h2>
+        <Link href="/admin/enquiries" className="inline-flex min-h-11 items-center text-sm font-bold lg:min-h-0">
+          All enquiries →
+        </Link>
+      </div>
+      <EnquiryNotice done={done} error={notice} />
+      {recent.error ? (
+        <ErrorState>We couldn&rsquo;t load the enquiries. Refresh the page to try again.</ErrorState>
+      ) : !recent.data.length ? (
+        <p className="text-sm">No enquiries yet.</p>
+      ) : (
+        <EnquiryTable label="Recent enquiries" enquiries={recent.data} back="/admin" />
       )}
     </>
   );
